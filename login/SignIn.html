@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>DevOps Project LoginPage</title>
+        <!-- Lien de la bibliotheque Remixicon pour les icons -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
+            rel="stylesheet">
+        <!-- Appel de la page style css -->
+        <link rel="stylesheet" href="../style.css">
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="../amazon-cognito-identity.min.js"></script>
+
+        <script src="../aws-sdk/dist/aws-sdk.min.js"></script>
+
+    </head>
+
+    <body>
+        <!-- The main content container -->
+        <div class="container">
+            <!-- Section de décoration-->
+            <div class="design">
+                <div class="pill-1 rotate-45"></div>
+                <div class="pill-2 rotate-45"></div>
+                <div class="pill-3 rotate-45"></div>
+                <div class="pill-4 rotate-45"></div>
+            </div>
+            <!-- Section de connexion-->
+            <div class="login">
+                <h3 class="title">Connexion</h3>
+                <div class="text-input">
+                    <i class="ri-user-fill"></i>
+                    <input id="mail" type="text" placeholder="email">
+                </div>
+                <div class="text-input">
+                    <i class="ri-lock-fill"></i>
+                    <input id="passwd" type="password"
+                        placeholder="Mot de passe">
+                </div>
+                <button class="login-btn" id="loginButton">Se connecter</button>
+
+            </div>
+        </div>
+        <script src="../js/login.js"></script>
+
+    </body>
+
+</html>
