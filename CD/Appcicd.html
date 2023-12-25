@@ -1,29 +1,41 @@
 <!DOCTYPE html>
 <html lang="fr">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>DevOps Project PipelinePage</title>
-        <!-- Lien de la bibliotheque Remixicon pour les icons -->
-        <link
-            href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
-            rel="stylesheet">
-        <!-- Appel de la page style css -->
-        <link rel="stylesheet" href="./style.css">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Project PipelinePage</title>
+    <link
+        href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
 
-    </head>
-
-    <body>
-        <!-- The main content container -->
-        <div class="container">        
-            <!-- Section de pipeline -->
-            <div class="Pipeline">
-                
-
-            </div>
+<body>
+    <div class="container">
+        <div class="Pipeline">
+            <button onclick="runScript('/runcode', 'result1')">Lancer le pipeline</button>
+            <div id="result1"></div>
+            <button onclick="runScript('/runsecondcode', 'result2')">Autre action</button>
+            <div id="result2"></div>
         </div>
-    </body>
+    </div>
+    <script>
+        function runScript(endpoint, resultDivId) {
+            var outputDiv = document.getElementById(resultDivId);
+            outputDiv.innerHTML = "<p>Exécution du script...</p>";
+
+            fetch(endpoint)
+                .then(response => response.json())
+                .then(data => {
+                    outputDiv.innerHTML = "<p>Script exécuté avec succès</p>" /*+ data.output*/;
+                })
+                .catch(error => {
+                    outputDiv.innerHTML = "<p style='color: red;'>Une erreur s'est produite : " + error + "</p>";
+                });
+        }
+    </script>
+</body>
 
 </html>
