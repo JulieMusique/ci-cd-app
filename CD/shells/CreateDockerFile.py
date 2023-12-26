@@ -2,16 +2,19 @@ import os
 
 def creer_fichier(emplacement, nom_fichier, contenu):
     chemin_fichier = os.path.join(emplacement, nom_fichier)
+    # Vérifie si le fichier existe déjà
+    if os.path.isfile(chemin_fichier):
+        print(f"Le fichier {nom_fichier} existe déjà à l'emplacement {emplacement}.")
     with open(chemin_fichier, 'w') as fichier:
         fichier.write(contenu)
 
 # Vérifie si le chemin existe, sinon le crée
 def verifier_et_creer_dossier(chemin):
     if not os.path.exists(chemin):
-        print("the repository ${chemin} does not exist")
+        print(f"the repository {chemin} does not exist")
 
 # Partie pour le backend
-pathback = '../DeliveCrous-back'
+pathback = './DeliveCrous-back'
 verifier_et_creer_dossier(pathback)
 backDocker = 'dockerfile'
 contenuback = """FROM eclipse-temurin:17
@@ -24,7 +27,7 @@ EXPOSE 8080
 creer_fichier(pathback, backDocker, contenuback)
 
 # Partie pour le frontend
-pathfront = '../DeliveCrous-front'
+pathfront = './DeliveCrous-front/flutter_food_delivery_ui_kit-master'
 verifier_et_creer_dossier(pathfront)
 frontDocker = 'dockerfile'
 contenufront = """FROM debian:latest AS build-env
