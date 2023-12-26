@@ -24,6 +24,18 @@ app.get('/runsonarcode', (req, res) => {
     const sonarScriptPath = path.join(__dirname, 'shells', 'SonarQube.py');
     executeScript(sonarScriptPath, res, 'result3');
 });
+// Endpoint for creating Docker image
+app.get('/createdocker', (req, res) => {
+    const createDockerScriptPath = path.join(__dirname, 'shells', 'DockerBuild.py');
+    executeScript(createDockerScriptPath, res, 'result4');
+});
+
+// Endpoint for deploying Docker image
+app.get('/deploy', (req, res) => {
+    const deployScriptPath = path.join(__dirname, 'shells', 'Deploy.py');
+    executeScript(deployScriptPath, res, 'result5');
+});
+
 function executeScript(scriptPath, res, resultDivId) {
     const pythonProcess = spawn('python', [scriptPath]);
 
