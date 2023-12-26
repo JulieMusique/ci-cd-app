@@ -25,14 +25,14 @@ app.get('/runsonarcode', (req, res) => {
     executeScript(sonarScriptPath, res, 'result3');
 });
 // Endpoint for creating Docker image
-app.get('/createdocker', (req, res) => {
-    const createDockerScriptPath = path.join(__dirname, 'shells', 'DockerBuild.py');
+app.get('/createdockers', (req, res) => {
+    const createDockerScriptPath = path.join(__dirname, 'shells', 'CreateDockerfile.py');
     executeScript(createDockerScriptPath, res, 'result4');
 });
 
 // Endpoint for deploying Docker image
 app.get('/deploy', (req, res) => {
-    const deployScriptPath = path.join(__dirname, 'shells', 'Deploy.py');
+    const deployScriptPath = path.join(__dirname, 'shells', 'DockerBuild.py');
     executeScript(deployScriptPath, res, 'result5');
 });
 
