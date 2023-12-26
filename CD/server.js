@@ -19,7 +19,11 @@ app.get('/runsecondcode', (req, res) => {
     const secondScriptPath = path.join(__dirname, 'shells', 'BuildBack.py');
     executeScript(secondScriptPath, res, 'result2');
 });
-
+// Endpoint for the SonarQube script
+app.get('/runsonarcode', (req, res) => {
+    const sonarScriptPath = path.join(__dirname, 'shells', 'SonarQube.py');
+    executeScript(sonarScriptPath, res, 'result3');
+});
 function executeScript(scriptPath, res, resultDivId) {
     const pythonProcess = spawn('python', [scriptPath]);
 
