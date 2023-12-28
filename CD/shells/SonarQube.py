@@ -2,7 +2,6 @@ import subprocess
 import os
 import sys
 import webbrowser
-#faut gerer les erreurs dans le cas le fichier est introuvable 
 def run_command(command, start_message, success_message, failure_message):
     print(start_message)
     print("Executing command:", command)
@@ -21,12 +20,7 @@ def run_command(command, start_message, success_message, failure_message):
         error.decode(sys.stderr.encoding, errors='replace')
     )
 
-# Change directory
 os.chdir("Delivecrous-back/")
-
-# Display current directory
-current_directory = os.getcwd()
-print(current_directory)
 
 # Clean the project with Maven and run Sonar analysis
 sonar_command = "mvn verify sonar:sonar \
@@ -41,20 +35,16 @@ return_code, output, error = run_command(
     success_message="Maven clean and Sonar analysis successful.",
     failure_message="Maven clean and Sonar analysis failed."
 )
-
-# Check return code and handle accordingly
 if return_code != 0:
     print("Error: Maven clean and Sonar analysis failed. Exiting...")
     sys.exit(1)
 
-# Print Sonar analysis output
 print("\nSonar Analysis Output:\n")
 print(output)
-# Extract URL from the Sonar analysis output
 url_start_index = output.find("you can find the results at: ") + len("you can find the results at: ")
 url_end_index = output.find("\n", url_start_index)
 sonar_url = output[url_start_index:url_end_index].strip()
 
-# Open the URL in a web browser
+# Opening the report in the browser
 print(f"Opening SonarQube dashboard: {sonar_url}")
 webbrowser.open(sonar_url, new=2)

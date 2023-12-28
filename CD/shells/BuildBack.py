@@ -20,14 +20,9 @@ def run_command(command, start_message, success_message, failure_message):
     )
 
 def main():
-    # Afficher le répertoire de travail actuel
-    print("Current working directory:", os.getcwd())
-
     # Changement de répertoire
+    #testing
     os.chdir("Delivecrous-back")
-    print("Changed to directory:", os.getcwd())
-
-    # Nettoyer le projet avec Maven
     clean_command = "mvn clean"
     return_code, _, _ = run_command(
         clean_command,
@@ -38,7 +33,7 @@ def main():
     if return_code != 0:
         sys.exit(1)
 
-    # Compiler le projet avec Maven
+    # Compiling
     compile_command = "mvn compile"
     return_code, _, _ = run_command(
         compile_command,
@@ -49,7 +44,7 @@ def main():
     if return_code != 0:
         sys.exit(1)
 
-    # Installer le projet avec Maven
+    # Installing project
     install_command = "mvn install"
     return_code, _, _ = run_command(
         install_command,
@@ -60,10 +55,6 @@ def main():
     if return_code != 0:
         sys.exit(1)
 
-    # Afficher un message de test
-    print("Test job")
-
-    # Exécuter les tests avec Maven
     test_command = "mvn --batch-mode --errors --fail-at-end --show-version test"
     return_code, _, _ = run_command(
         test_command,

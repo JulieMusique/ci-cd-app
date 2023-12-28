@@ -3,8 +3,6 @@ import json
 import os
 
 output = {}
-
-# Function to clone or pull a Git repository
 def clone_or_pull(repo_url, repo_path):
     if os.path.exists(repo_path):
         # If the directory already exists, pull the latest changes

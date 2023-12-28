@@ -9,8 +9,10 @@
         <link
             href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
             rel="stylesheet">
-        </head>
-        <style>
+    </head>
+    <!-- Styles CSS pour la mise en forme de la page -->
+
+    <style>
             @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
 *, html, body {
@@ -82,23 +84,25 @@ body {
         display: block;
     }
 }
-
         </style>
     <body>
         <div class="container">
             <div class="Pipeline">
-                <button onclick="runScript('/runcode', 'result1')">Lancer le
-                    pipeline</button>
+                <button onclick="runScript('/runcode', 'result1')">récuperer le
+                    code source via gitlab</button>
                 <div id="result1"></div>
-                <button onclick="runScript('/runsecondcode', 'result2')">Autre
-                    action</button>
+                <button onclick="runScript('/runsecondcode', 'result2')">lancer
+                    les tests d'unités et d'integration</button>
                 <div id="result2"></div>
-                <button onclick="runScript('/runsonarcode', 'result3')">Exécuter
+                <button onclick="runScript('/runsonarcode', 'result3')">Analyse
+                    du code avec
                     SonarQube</button>
                 <div id="result3"></div>
-                <button onclick="runScript('/createdockers', 'result4')">Création image docker</button>
+                <button onclick="runScript('/createdockers', 'result4')">Création
+                    image docker</button>
                 <div id="result4"></div>
-                <button onclick="runScript('/deploy', 'result5')">Deployement Docker</button>
+                <button onclick="runScript('/deploy', 'result5')">Deployement
+                    Docker sur la VM en prod</button>
                 <div id="result5"></div>
             </div>
         </div>
