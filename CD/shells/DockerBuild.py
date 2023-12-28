@@ -39,25 +39,63 @@ def transfer_folder(ssh, local_folder, remote_username, remote_host):
     subprocess.run(["scp", "-r", local_folder, f"{remote_username}@{remote_host}:{remote_folder_path}"])
 
     print(f"Transfert du dossier {local_folder} réussi.")
+def deployDocker(ssh, folder, docker, port):
+    sudo_password = getpass("Enter your sudo password: ")
+
+    # Vérification si le conteneur existe déjà et le stoppe le cas échéant
+    check_container_cmd = f"echo '{sudo_password}' | sudo -S docker ps -q --filter name={docker}"
+    stdin, stdout, stderr = ssh.exec_command(check_container_cmd)
+    existing_container_id = stdout.read().decode().strip()
+
+    if existing_container_id:
+        print(f"Le conteneur {docker} existe déjà. Arrêt en cours...")
+        stop_container_cmd = f"echo '{sudo_password}' | sudo -S docker stop {existing_container_id}"
+        ssh.exec_command(stop_container_cmd)
+        print(f"Conteneur {docker} arrêté avec succès.")
+
+        # Supprissionle conteneur existant
+        remove_container_cmd = f"echo '{sudo_password}' | sudo -S docker rm {existing_container_id}"
+        ssh.exec_command(remove_container_cmd)
+        print(f"Conteneur {docker} supprimé avec succès.")
+
+    # Construction de l'image Docker
+    build_image_cmd = f"echo '{sudo_password}' | sudo -S docker build -t {docker} {folder}"
+    stdin, stdout, stderr = ssh.exec_command(build_image_cmd)
+
+    exit_status = stdout.channel.recv_exit_status()
+
+    # Affiche la sortie de la commande Docker
+    docker_output = stdout.read().decode().strip()
+    print("Docker Output:", docker_output)
+
+    # Affichage les logs Docker en cas d'échec
+    if exit_status != 0:
+        print("Docker Build Failed. Docker Logs:")
+        print(stderr.read().decode())
+        return False
+
+    # Exécution la commande 'docker ps' pour afficher les conteneurs en cours d'exécution
+    docker_ps_cmd = "echo '{sudo_password}' | sudo -S docker ps"
+    stdin, stdout, stderr = ssh.exec_command(docker_ps_cmd)
+    docker_ps_output = stdout.read().decode().strip()
+    print("Docker PS Output:", docker_ps_output)
+
+    # Démarrage le conteneur après la construction de l'image
+    start_container_cmd = f"echo '{sudo_password}' | sudo -S docker run -d -p {port}:{port} --name {docker} {docker}"
+    stdin, stdout, stderr = ssh.exec_command(start_container_cmd)
+    start_container_output = stdout.read().decode().strip()
+    print("Start Container Output:", start_container_output)
+
+    return exit_status == 0
+
+
+    
+
 def check_dockerfile_exists(ssh, folder):
-    # Change to the specified folder
     change_dir_cmd = f"cd {folder} ; pwd"
     stdin, stdout, stderr = ssh.exec_command(change_dir_cmd)
     current_dir = stdout.read().decode().strip()
-    
-    # Print the result of the pwd command
-    print(f"Current directory: {current_dir}")
-    sudo_password = getpass("Enter your sudo password: ")
-
-    deploy_docker_command = f"cd {folder} ; echo '{sudo_password}' | sudo -S docker build -t back . "
-    stdin, stdout, stderr = ssh.exec_command(deploy_docker_command)
-    # Attendre la fin de l'exécution de la commande
-    exit_status = stdout.channel.recv_exit_status()
-    if exit_status == 0:
-            print("Docker a été deploye avec succès.")
-    else:
-            print("Échec de deploiement de Docker. Vérifiez les erreurs ci-dessous:")
-            print(stderr.read().decode())
+        
     # Check if Dockerfile exists in the specified folder (case-insensitive)
     dockerfile_exists_cmd = f"ls -i {current_dir} | grep -i dockerfile | wc -l"
     stdin, stdout, stderr = ssh.exec_command(dockerfile_exists_cmd)
@@ -102,22 +140,18 @@ try:
         
         # Vérification de l'existence de Dockerfile dans le dossier front
         if check_dockerfile_exists(ssh, "./Delivecrous-back"):
-            print("Le fichier Dockerfile existe dans le dossier flutter_food_delivery_ui_kit-master.")
-           
-        
+            print("Le fichier Dockerfile existe dans le dossier Delivecrous-back.")
+            deployDocker(ssh, "./Delivecrous-back","back",8080)
 
         else:
-            print("Le fichier Dockerfile n'existe pas dans le dossier flutter_food_delivery_ui_kit-master.")
+            print("Le fichier Dockerfile n'existe pas dans le dossier delivecrous-back")
          # Vérification de l'existence de Dockerfile dans le dossier front
         if check_dockerfile_exists(ssh, "./flutter_food_delivery_ui_kit-master"):
             print("Le fichier Dockerfile existe dans le dossier flutter_food_delivery_ui_kit-master.")
+            deployDocker(ssh, "./flutter_food_delivery_ui_kit-master","front",80)
+
         else:
             print("Le fichier Dockerfile n'existe pas dans le dossier flutter_food_delivery_ui_kit-master.")
-        
-        
-        
-       
-      
 
 finally:
     # Fermeture la connexion SSH

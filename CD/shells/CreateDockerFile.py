@@ -18,6 +18,7 @@ pathback = './DeliveCrous-back'
 verifier_et_creer_dossier(pathback)
 backDocker = 'dockerfile'
 contenuback = """FROM eclipse-temurin:17
+LABEL name="back"
 WORKDIR /app
 COPY ./target/delivecrous-0.0.1-SNAPSHOT.jar /app/app.jar
 CMD ["java", "-jar", "app.jar"]
@@ -31,12 +32,12 @@ pathfront = './DeliveCrous-front/flutter_food_delivery_ui_kit-master'
 verifier_et_creer_dossier(pathfront)
 frontDocker = 'dockerfile'
 contenufront = """FROM debian:latest AS build-env
-
+LABEL name="front"
 RUN apt-get update
 RUN apt-get install -y curl git wget unzip libgconf-2-4 gdb libstdc++6 libglu1-mesa fonts-droid-fallback lib32stdc++6 python3 sed
 RUN apt-get clean
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
-
+LABEL name="front"
 ENV PATH="${PATH}:/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin"
 
 RUN flutter doctor -v
