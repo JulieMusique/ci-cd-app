@@ -11,3 +11,7 @@
    ```bash
    npm install express + pip install paramiko
    deplacement sur le repertoire cd + node server.js pour lancer le serveur 
+  ```
+## VM serveur de prod 
+-> en bridge 
+-> installer openssh-server + start the server
