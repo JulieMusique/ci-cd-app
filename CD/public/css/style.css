@@ -17,7 +17,7 @@ body {
 .container {
     width: 95vw;
     height: 90vh;
-    display: grid;
+    /*display: grid;*/
     grid-template-columns: 100%;
     grid-template-areas: "pipeline";
     box-shadow: 0 0 17px 10px rgb(0 0 0 / 30%);
@@ -58,6 +58,95 @@ body {
     color: #9a9a9a;
     margin-left: 10px;
 }
+
+table{
+    width: 100%;
+}
+
+#stages {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+    position: relative;
+}
+
+#stages > .circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #999;
+    font-size: 22px;
+    font-weight: 500;
+    border: 2px solid #e0e0e0;
+    background-color: #fff;
+    z-index: 1;
+}
+
+.circle-passed{
+    border-color: #34C924;
+    color: #34C924;
+}
+
+.circle-failed{
+    border-color: #FF370C;
+    color: #FF370C;
+}
+
+.circle-running{
+    border-color: #0047AB;
+    color: #0047AB;
+}
+
+#stages > .progress-bar {
+    position: absolute;
+    height: 4px;
+    width: 100%;
+    background: #e0e0e0;
+}
+
+.progress-bar > .indicator{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background: #e0e0e0;
+}
+
+/*.circle {
+    width: 40px;
+    height: 40px;
+    margin: 2%;
+    border-radius: 50%;
+    border: 2px solid black;
+    position: relative;
+}
+
+.circle:before {
+    content: "";
+    height: 10px;
+    width: 20px;
+    border-left: 3px solid #000;
+    border-bottom: 3px solid #000;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -60%) rotate(-45deg);
+    transform-origin: center center;
+}
+
+.circle:after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 19px;
+    background: #21d4fd;
+    width: 100%;
+    height: 2px;
+    transform: translateX(-50%);
+}*/
 
 @media (min-width: 768px) {
     .container {
