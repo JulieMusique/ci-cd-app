@@ -78,26 +78,29 @@ table{
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    color: #999;
     font-size: 22px;
     font-weight: 500;
-    border: 2px solid #e0e0e0;
     background-color: #fff;
     z-index: 1;
 }
 
+.circle-inactif{
+    color: #999;
+    border: 2px solid #e0e0e0;
+}
+
 .circle-passed{
-    border-color: #34C924;
+    border: 2px solid #34C924;
     color: #34C924;
 }
 
 .circle-failed{
-    border-color: #FF370C;
+    border: 2px solid #FF370C;
     color: #FF370C;
 }
 
 .circle-running{
-    border-color: #0047AB;
+    border: 2px solid#0047AB;
     color: #0047AB;
 }
 

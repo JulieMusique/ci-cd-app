@@ -40,7 +40,6 @@ app.get('/deploy', (req, res) => {
 
 function executeScript(scriptPath, res, resultDivId) {
     const pythonProcess = spawn('python', [scriptPath]);
-
     pythonProcess.stdout.on('data', (data) => {
         console.log(`stdout: ${data}`);
     });
