@@ -23,13 +23,15 @@
                         <th scope="col">Status</th>
                         <th scope="col">Pipeline</th>
                         <th scope="col">Stages</th>
-                        <th scope="col">Execution</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Duration</th>
+
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
                         <th scope="row">1</th>
-                        <td>Mark</td>
+                        <td id="pipeline1">N/A</td>
                         <td>
                             <div id="stages">
                                 <span id="circle-1" class="circle circle-inactif">1</span>
@@ -42,22 +44,78 @@
                                 </div>
                             </div>
                         </td>
-                        <td>@mdo</td>
+                        <td id="startTime">N/A</td> <!-- Nouvelle cellule pour l'heure de début -->
+
+                        <td id="totalDuration">N/A</td>
+
                       </tr>
                       <tr>
                         <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
+                        <td>#1</td>
+                        <td></td>
                       </tr>
                       <tr>
                         <th scope="row">3</th>
-                        <td colspan="2">Larry the Bird</td>
-                        <td>@twitter</td>
+                        <td colspan="2">#2</td>
                       </tr>
                     </tbody>
                   </table>
-                <button onclick="runScript('/runcode', 'result1')">récuperer le
+
+
+                  <button onclick="executerActions()">Exécuter toutes les actions</button>
+
+                  <div id="result1"></div>
+                  <div id="result2"></div>
+                  <div id="result3"></div>
+                  <div id="result4"></div>
+                  <div id="result5"></div>
+                  
+                  <script>
+                  function runScript(url, resultId) {
+
+                      alert(`Exécution de ${url}`);
+                      document.getElementById(resultId).innerHTML = "Action terminée";
+                  }
+                  
+                  async function executerActions() {
+                    const startTime = new Date();
+                    document.getElementById('startTime').innerText = formatDateTime(startTime);
+                    const pipelineNumber = generateRandomAlphanumeric();
+                    document.getElementById('pipeline1').innerText = `#${pipelineNumber}`;
+                    const scripts = [
+                        { endpoint: '/runcode', resultDivId: 'result1', circleId: 'circle-1' },
+                        { endpoint: '/runsecondcode', resultDivId: 'result2', circleId: 'circle-2' },
+                        { endpoint: '/runsonarcode', resultDivId: 'result3', circleId: 'circle-3' },
+                        { endpoint: '/createdockers', resultDivId: 'result4', circleId: 'circle-4' },
+                        { endpoint: '/deploy', resultDivId: 'result5', circleId: 'circle-5' }
+                    ];
+                
+                    for (let i = 0; i < scripts.length; i++) {
+                        await runScript(scripts[i].endpoint, scripts[i].resultDivId, scripts[i].circleId);
+                    }
+                    const endTime = new Date();
+                    const duration = endTime - startTime;
+                    document.getElementById('totalDuration').innerText = duration + ' millisecondes';
+
+                    console.log('Durée totale d\'exécution :', duration, 'millisecondes');
+                }
+                function generateRandomAlphanumeric(length = 8) {
+                    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                    let result = '';
+                    for (let i = 0; i < length; i++) {
+                        const randomIndex = Math.floor(Math.random() * charset.length);
+                        result += charset.charAt(randomIndex);
+                    }
+                    return result;
+                }
+                function formatDateTime(dateTime) {
+                    const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+                    return dateTime.toLocaleString('fr-FR', options);
+                }
+                  </script>
+
+
+              <!--  <button onclick="runScript('/runcode', 'result1')">récuperer le
                     code source via gitlab</button>
                 <div id="result1"></div>
                 <button onclick="runScript('/runsecondcode', 'result2')">lancer
@@ -72,7 +130,7 @@
                 <div id="result4"></div>
                 <button onclick="runScript('/deploy', 'result5')">Deployement
                     Docker sur la VM en prod</button>
-                <div id="result5"></div>
+                <div id="result5"></div>-->
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>

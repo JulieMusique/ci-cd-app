@@ -1,23 +1,21 @@
-function runScript(endpoint, resultDivId) {
+async function runScript(endpoint, resultDivId, circleId) {
     var outputDiv = document.getElementById(resultDivId);
-    let number = outputDiv.id.at(-1);
-    let circle = document.getElementById('circle-'+number);
-    console.log(circle);
-    console.log(number);
+    let circle = document.getElementById(circleId);
+
+    console.log(circleId);
     outputDiv.innerHTML = "<p>Exécution du script...</p>";
     circle.classList.remove('circle-inactif');
     circle.classList.add('circle-running');
-    fetch(endpoint)
-        .then(response => {
-            circle.classList.remove('circle-running');
-            response.json()})
-        .then(data => {
-            outputDiv.innerHTML = "<p>Script exécuté avec succès</p>" /*+ data.output*/;
-            circle.classList.add('circle-passed');
-        })
-        .catch(error => {
-            outputDiv.innerHTML = "<p style='color: red;'>Une erreur s'est produite : " + error + "</p>";
-            
-            circle.classList.add('circle-failed');
-        });
+
+    try {
+        let response = await fetch(endpoint);
+        let data = await response.json();
+        outputDiv.innerHTML = "<p>Script exécuté avec succès</p>" /*+ data.output*/;
+        circle.classList.remove('circle-running');
+        circle.classList.add('circle-passed');
+    } catch (error) {
+        outputDiv.innerHTML = "<p style='color: red;'>Une erreur s'est produite : " + error + "</p>";
+        circle.classList.remove('circle-running');
+        circle.classList.add('circle-failed');
+    }
 }
