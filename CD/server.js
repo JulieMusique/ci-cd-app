@@ -41,20 +41,25 @@ app.get('/deploy', (req, res) => {
 
 function executeScript(scriptPath, res, resultDivId) {
     const pythonProcess = spawn('python', [scriptPath]);
+    let outputData = "";
+
     pythonProcess.stdout.on('data', (data) => {
+        outputData += data.toString();
         console.log(`stdout: ${data}`);
     });
 
     pythonProcess.stderr.on('data', (data) => {
+        outputData += data.toString();
         console.error(`stderr: ${data}`);
     });
 
     pythonProcess.on('close', (code) => {
-        // console.log(`child process exited with code ${code}`);
+        console.log(`child process exited with code ${code}`);
+        res.json({ output: outputData, exitCode: code, resultDivId });
     });
 
     pythonProcess.on('exit', (code) => {
-        res.json({ output: `Child process exited with code ${code}`, resultDivId });
+        console.log(`child process exited with code ${code}`);
     });
 }
 
