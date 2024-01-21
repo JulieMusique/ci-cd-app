@@ -71,3 +71,30 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
             return False
         expires_at = self.issued_at + self.expires_in * 2
         return expires_at >= time.time()
+    
+class HistoryPipeline(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    idPipeline = db.Column(db.Integer, primary_key=True)
+    idUser = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.models.DateTimeField(_(""), auto_now=False, auto_now_add=False), unique=True)
+    status = db.Column(db.String(20), unique=True)
+    stages_status = db.Column(db.models.TextField(), unique=False)
+    duration = db.Column(db.String(20), unique=False)
+
+    def __str__(self):
+        return self.idPipeline
+
+    def get_user_id(self):
+        return self.idUser
+    
+    def get_status(self):
+        return self.status
+    
+    def get_date(self):
+        return self.date
+    
+    def get_stages_status(self):
+        return self.stages_status
+    
+    def get_duration(self):
+        return self.duration

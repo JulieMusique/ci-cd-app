@@ -4,8 +4,8 @@ async function runScript(endpoint, resultDivId, circleId, statusElementId) {
     let statusElement = document.getElementById(statusElementId);
 
     console.log(circleId);
-console.log('statusElementId:', statusElementId);
-console.log('statusElement:', statusElement);
+    console.log('statusElementId:', statusElementId);
+    console.log('statusElement:', statusElement);
 
     outputDiv.innerHTML = "<p>Exécution du script...</p>";
     circle.classList.remove('circle-inactif');
