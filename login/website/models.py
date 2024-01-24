@@ -5,6 +5,7 @@ from authlib.integrations.sqla_oauth2 import (
     OAuth2AuthorizationCodeMixin,
     OAuth2TokenMixin,
 )
+from sqlalchemy import desc
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -72,6 +73,10 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
         expires_at = self.issued_at + self.expires_in * 2
         return expires_at >= time.time()
     
+    def get_last_token_for_user(user_id):
+        # Récupérer le dernier token pour un utilisateur spécifique
+        return OAuth2Token.query.filter_by(user_id=user_id).order_by(desc(OAuth2Token.issued_at)).first()
+
 class HistoryPipeline(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     idPipeline = db.Column(db.Integer, primary_key=True)
