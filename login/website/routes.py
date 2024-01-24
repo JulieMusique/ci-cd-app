@@ -5,7 +5,7 @@ from flask import render_template, redirect, jsonify
 from werkzeug.security import gen_salt
 from authlib.integrations.flask_oauth2 import current_token
 from authlib.oauth2 import OAuth2Error
-from .models import db, User, OAuth2Client
+from .models import db, User, OAuth2Client, HistoryPipeline
 from .oauth2 import PasswordGrant, authorization, require_oauth
 
 bp = Blueprint('home', __name__)
@@ -15,7 +15,12 @@ def current_user():
         uid = session['id']
         return User.query.get(uid)
     return None
-
+ 
+def current_user_pipeline():
+    if 'id' in session:
+        uid = session['id']
+        return HistoryPipeline.query.filter_by(userid = uid)
+    return None
 
 @bp.route('/', methods=('GET', 'POST'))
 def home():
@@ -74,7 +79,6 @@ def create_client_for_user(user):
     db.session.commit()
     flash(f"Client '{client_id}' créé avec succès pour l'utilisateur '{user.username}'.", "success")
 
-
 @bp.route('/logout')
 def logout():
     del session['id']
@@ -107,6 +111,30 @@ def create_user():
 
     return redirect('/')
 
+@bp.route('/create_pipeline', methods=('GET', 'POST'))
+def create_pipeline():
+    user = current_user()
+
+    if request.method == 'GET':
+        return render_template('Appcicd.html')
+
+    existing_user = User.query.filter_by(username=user.username).first()
+
+    if existing_user:
+        
+        # L'utilisateur n'existe pas, créons un nouvel utilisateur et un client associé
+        pipeline_id = gen_salt(24)
+        pipeline_date = time.time()
+        pipeline_idUser = user.id
+        pipeline = HistoryPipeline(idPipeline=pipeline_id, idUser=pipeline_idUser, date=pipeline_date)
+        db.session.add(pipeline)
+        db.session.commit()
+    else:
+        flash(f"L'utilisateur '{user.username}' n'existe pas.", "danger")
+        return render_template('create_user.html')
+
+    return redirect('/')
+
 @bp.route('/oauth/authorize', methods=['GET', 'POST'])
 def authorize():
     user = current_user()
@@ -116,7 +144,7 @@ def authorize():
         return redirect(url_for('home.home', next=request.url))
 
     if request.method == 'GET':
-        # Vous pouvez personnaliser la logique ici pour demander le consentement de l'utilisateur
+        # Vous pouvez personnaliser la logique ici pour demander le consentement de l'uti lisateur
         return render_template('authorize.html', user=user)
 
     # Traitement de la demande d'autorisation

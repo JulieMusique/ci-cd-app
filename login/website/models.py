@@ -98,3 +98,12 @@ class HistoryPipeline(db.Model):
     
     def get_duration(self):
         return self.duration
+
+    def set_duration(self, duration):
+        self.duration = duration
+    
+    def set_status(self, status):
+        self.status = status
+
+    def set_stages_status(self, stages_status):
+        self.stages_status = stages_status
