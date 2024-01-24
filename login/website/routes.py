@@ -1,14 +1,17 @@
 from flask import flash
 import time
+from secrets import token_urlsafe
 from flask import Blueprint, request, session, url_for
-from flask import render_template, redirect, jsonify
+from flask import render_template, redirect
+import requests
 from werkzeug.security import gen_salt
 from authlib.integrations.flask_oauth2 import current_token
 from authlib.oauth2 import OAuth2Error
-from .models import db, User, OAuth2Client
+from .models import OAuth2Token, db, User, OAuth2Client
 from .oauth2 import PasswordGrant, authorization, require_oauth
 
 bp = Blueprint('home', __name__)
+
 
 def current_user():
     if 'id' in session:
@@ -55,7 +58,7 @@ def issue_token():
     return authorization.create_token_response()
 
 def create_client_for_user(user):
-    # Créer un client pour l'utilisateur
+    print("Créer un client pour l'utilisateur")
     client_id = gen_salt(24)
     client_id_issued_at = int(time.time())
     client = OAuth2Client(
@@ -72,6 +75,26 @@ def create_client_for_user(user):
 
     db.session.add(client)
     db.session.commit()
+
+    access_token = token_urlsafe(32)
+    print("access_token : ", access_token )
+    token = OAuth2Token(
+        user_id=user.id,
+        client_id=client.client_id,
+        token_type=None,  
+        access_token=access_token,  
+        refresh_token=None, 
+        scope="complete access" if user.isAdmin else "read only",
+        issued_at=int(time.time()),
+        access_token_revoked_at=0,
+        refresh_token_revoked_at=0,
+        expires_in=0,
+    )
+
+    print("token : ", token )
+    db.session.add(token)
+    db.session.commit()
+    
     flash(f"Client '{client_id}' créé avec succès pour l'utilisateur '{user.username}'.", "success")
 
 
@@ -110,17 +133,25 @@ def create_user():
 @bp.route('/oauth/authorize', methods=['GET', 'POST'])
 def authorize():
     user = current_user()
-
-    # Si l'utilisateur n'est pas connecté, redirigez-le vers la page de connexion
+    # if user log status is not true (Auth server), then to log it in
     if not user:
         return redirect(url_for('home.home', next=request.url))
-
     if request.method == 'GET':
-        # Vous pouvez personnaliser la logique ici pour demander le consentement de l'utilisateur
-        return render_template('authorize.html', user=user)
+        try:
+            grant = authorization.get_consent_grant(end_user=user)
+        except OAuth2Error as error:
+            return error.error
+        return render_template('authorize.html', user=user, grant=grant)
+    if not user and 'username' in request.form:
+        username = request.form.get('username')
+        user = User.query.filter_by(username=username).first()
+    if request.form['confirm']:
+        grant_user = user
+    else:
+        grant_user = None
+    return authorization.create_authorization_response(grant_user=grant_user)
 
-    # Traitement de la demande d'autorisation
-    return authorization.create_authorization_response(user=user)
+
 
 
 
@@ -134,7 +165,6 @@ def revoke_token():
     return authorization.create_endpoint_response('revocation')
 
 @bp.route('/protected', methods=['GET'])
-@require_oauth('complete access')
 def protected_resource():
     user = current_user()
 
@@ -144,16 +174,25 @@ def protected_resource():
         return redirect('/')
     
     # Récupérez le token actuel
-    token = current_token
+    last_token = OAuth2Token.get_last_token_for_user(user.id)
 
-    if token:
-        print("Access granted to protected resource for user:", user.username)
-        print("Access Token:", token.get("access_token"))
-        print("Scope:", token.get("scope"))
+    print("Last token for user:", last_token)
+    a = True if 'complete access' in last_token.scope else False
+    print("token contains admin's rights ? ",a )
+
+    if last_token:
+        if 'complete access' in last_token.scope:
+            print("Access granted to protected resource for user:", user.username)
+            print("Access Token:", last_token.access_token)
+            print("Scope:", last_token.scope)
+        else:
+            print("Insufficient scope for this resource. Admin rights required.")
+            flash("Tu dois avoir les droits d'admin pour accéder à cette ressource.", "danger")
+            return redirect('/')
     else:
         print("No access token found.")
 
-    return render_template('protected.html', user=user)
+    return render_template('Appcicd.html', user=user)
 
 
 
