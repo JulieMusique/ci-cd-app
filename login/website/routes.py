@@ -24,7 +24,7 @@ def current_user():
 def current_user_pipeline():
     if 'id' in session:
         uid = session['id']
-        return HistoryPipeline.query.filter_by(userid = uid)
+        return HistoryPipeline.query.filter_by(idUser = uid)
     return None
 
 @bp.route('/', methods=('GET', 'POST'))
