@@ -15,7 +15,7 @@ async function runScript(endpoint, resultDivId, circleId, statusElementId) {
 
     try {
         let response = await fetch(endpoint);
-
+        console.log(endpoint)
         if (response.ok) {
             let data = await response.json();
 

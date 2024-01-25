@@ -223,45 +223,45 @@ def protected_resource():
 
     return render_template('Appcicd.html', user=user, pipelines=pipelines)
 
-#@bp.route('/')
-#def index():
-#    return send_file('public/Appcicd.html')
-
-
+@bp.route('/run_code')
 def run_code():
-    script_path = os.path.join('shells', 'codeGit.py')
+  
+    script_path = './shells/codeGit.py'
     return execute_script(script_path, 'result1')
 
-
+@bp.route('/run_second_code')
 def run_second_code():
     script_path = os.path.join('shells', 'BuildBack.py')
     return execute_script(script_path, 'result2')
 
-
+@bp.route('/run_sonar_code')
 def run_sonar_code():
     script_path = os.path.join('shells', 'SonarQube.py')
     return execute_script(script_path, 'result3')
 
-
+@bp.route('/create_dockers')
 def create_dockers():
     script_path = os.path.join('shells', 'CreateDockerfile.py')
     return execute_script(script_path, 'result4')
 
-
+@bp.route('/deploy')
 def deploy():
-    script_path = os.path.join('CD/shells', 'DockerBuild.py')
+    script_path = os.path.join('shells', 'DockerBuild.py')
     return execute_script(script_path, 'result5')
+
 
 def execute_script(script_path, result_div_id):
     output_data = ""
     try:
-        process = subprocess.Popen(['/usr/bin/python3', script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print("communicate : ", process.communicate())
+        process = subprocess.Popen(['python', script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         outputdata, _ = process.communicate()
         exit_code = process.returncode
         print(f'child process exited with code {exit_code}')
-        return jsonify(output=output_data.decode(), exitCode=exit_code, resultDivId=result_div_id)
+
+        # Utilisez outputdata au lieu de output_data
+        output_data = outputdata.decode()
+
+        return jsonify(output=output_data, exitCode=exit_code, resultDivId=result_div_id)
     except Exception as e:
         print(f'Error executing script: {e}')
         return jsonify(error=str(e))
-
