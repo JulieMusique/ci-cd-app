@@ -16,6 +16,10 @@
     <!-- Styles CSS pour la mise en forme de la page -->
     <body>
         <div class="container">
+          <div>pipelines History</div>
+          {%- for pipeline in pipelines %}
+          <div>{{ pipeline }}</div>
+          {%- endfor %}
             <div class="Pipeline">
                 <table class="table">
                     <thead>

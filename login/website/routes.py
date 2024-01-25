@@ -198,6 +198,7 @@ def protected_resource():
     
     # Récupérez le token actuel
     last_token = OAuth2Token.get_last_token_for_user(user.id)
+    pipelines = current_user_pipeline()
 
     print("Last token for user:", last_token)
     a = True if 'complete access' in last_token.scope else False
@@ -215,7 +216,7 @@ def protected_resource():
     else:
         print("No access token found.")
 
-    return render_template('Appcicd.html', user=user)
+    return render_template('Appcicd.html', user=user, pipelines=pipelines)
 
 
 
