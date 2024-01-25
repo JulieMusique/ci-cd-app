@@ -7,7 +7,7 @@ import requests
 from werkzeug.security import gen_salt
 from authlib.integrations.flask_oauth2 import current_token
 from authlib.oauth2 import OAuth2Error
-from .models import OAuth2Token, db, User, OAuth2Client
+from .models import OAuth2Token, db, User, OAuth2Client, HistoryPipeline
 from .oauth2 import PasswordGrant, authorization, require_oauth
 
 bp = Blueprint('home', __name__)
@@ -18,7 +18,12 @@ def current_user():
         uid = session['id']
         return User.query.get(uid)
     return None
-
+ 
+def current_user_pipeline():
+    if 'id' in session:
+        uid = session['id']
+        return HistoryPipeline.query.filter_by(userid = uid)
+    return None
 
 @bp.route('/', methods=('GET', 'POST'))
 def home():
@@ -97,7 +102,6 @@ def create_client_for_user(user):
     
     flash(f"Client '{client_id}' créé avec succès pour l'utilisateur '{user.username}'.", "success")
 
-
 @bp.route('/logout')
 def logout():
     del session['id']
@@ -130,6 +134,30 @@ def create_user():
 
     return redirect('/')
 
+@bp.route('/create_pipeline', methods=('GET', 'POST'))
+def create_pipeline():
+    user = current_user()
+
+    if request.method == 'GET':
+        return render_template('Appcicd.html')
+
+    existing_user = User.query.filter_by(username=user.username).first()
+
+    if existing_user:
+        
+        # L'utilisateur n'existe pas, créons un nouvel utilisateur et un client associé
+        pipeline_id = gen_salt(24)
+        pipeline_date = time.time()
+        pipeline_idUser = user.id
+        pipeline = HistoryPipeline(idPipeline=pipeline_id, idUser=pipeline_idUser, date=pipeline_date)
+        db.session.add(pipeline)
+        db.session.commit()
+    else:
+        flash(f"L'utilisateur '{user.username}' n'existe pas.", "danger")
+        return render_template('create_user.html')
+
+    return redirect('/')
+
 @bp.route('/oauth/authorize', methods=['GET', 'POST'])
 def authorize():
     user = current_user()
@@ -151,14 +179,9 @@ def authorize():
         grant_user = None
     return authorization.create_authorization_response(grant_user=grant_user)
 
-
-
-
-
 @bp.route('/oauth/token', methods=['POST'])
 def issue_token():
     return authorization.create_token_response()
-
 
 @bp.route('/oauth/revoke', methods=['POST'])
 def revoke_token():
@@ -175,6 +198,7 @@ def protected_resource():
     
     # Récupérez le token actuel
     last_token = OAuth2Token.get_last_token_for_user(user.id)
+    pipelines = current_user_pipeline()
 
     print("Last token for user:", last_token)
     a = True if 'complete access' in last_token.scope else False
@@ -192,7 +216,7 @@ def protected_resource():
     else:
         print("No access token found.")
 
-    return render_template('Appcicd.html', user=user)
+    return render_template('Appcicd.html', user=user, pipelines=pipelines)
 
 
 

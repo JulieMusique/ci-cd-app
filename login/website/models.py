@@ -6,7 +6,8 @@ from authlib.integrations.sqla_oauth2 import (
     OAuth2TokenMixin,
 )
 from sqlalchemy import desc
-
+#from sqlalchemy import DateTime
+#from sqlalchemy import text
 from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
@@ -76,3 +77,39 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
     def get_last_token_for_user(user_id):
         # Récupérer le dernier token pour un utilisateur spécifique
         return OAuth2Token.query.filter_by(user_id=user_id).order_by(desc(OAuth2Token.issued_at)).first()
+
+class HistoryPipeline(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    idPipeline = db.Column(db.Integer)
+    idUser = db.Column(db.Integer)
+    date = db.Column(db.Date)
+    status = db.Column(db.String(20))
+    stages_status = db.Column(db.Text)
+    duration = db.Column(db.String(20))
+
+    def __str__(self):
+        return str(self.idPipeline)
+
+    def get_user_id(self):
+        return self.idUser
+
+    def get_status(self):
+        return self.status
+
+    def get_date(self):
+        return self.date
+
+    def get_stages_status(self):
+        return self.stages_status
+
+    def get_duration(self):
+        return self.duration
+
+    def set_duration(self, duration):
+        self.duration = duration
+
+    def set_status(self, status):
+        self.status = status
+
+    def set_stages_status(self, stages_status):
+        self.stages_status = stages_status
