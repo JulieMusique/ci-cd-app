@@ -16,7 +16,6 @@
     <!-- Styles CSS pour la mise en forme de la page -->
     <body>
         <div class="container">
-          <div>pipelines History</div>
           {%- for pipeline in pipelines %}
           <div>{{ pipeline }}</div>
           {%- endfor %}
@@ -87,15 +86,15 @@
                     const pipelineNumber = generateRandomAlphanumeric();
                     document.getElementById('pipeline1').innerText = `#${pipelineNumber}`;
                     const scripts = [
-                    { endpoint: '/runcode', resultDivId: 'result1', circleId: 'circle-1', statusElementId: 'status-1' },
-                    { endpoint: '/runsecondcode', resultDivId: 'result2', circleId: 'circle-2', statusElementId: 'status-1' },
-                    { endpoint: '/runsonarcode', resultDivId: 'result3', circleId: 'circle-3', statusElementId: 'status-1' },
-                    { endpoint: '/createdockers', resultDivId: 'result4', circleId: 'circle-4', statusElementId: 'status-1' },
-                    { endpoint: '/deploy', resultDivId: 'result5', circleId: 'circle-5', statusElementId: 'status-1' }
+                    { endpoint: "{{ url_for('.run_code') }}", resultDivId: 'result1', circleId: 'circle-1', statusElementId: 'status-1' },
+                    { endpoint: "{{ url_for('.run_second_code') }}", resultDivId: 'result2', circleId: 'circle-2', statusElementId: 'status-1' },
+                    { endpoint: "{{ url_for('.run_sonar_code') }}", resultDivId: 'result3', circleId: 'circle-3', statusElementId: 'status-1' },
+                    { endpoint: "{{ url_for('.create_dockers') }}", resultDivId: 'result4', circleId: 'circle-4', statusElementId: 'status-1' },
+                    { endpoint: "{{ url_for('.deploy') }}", resultDivId: 'result5', circleId: 'circle-5', statusElementId: 'status-1' }
                     ];
                 
                     for (let i = 0; i < scripts.length; i++) {
-                        await runScript(scripts[i].endpoint, scripts[i].resultDivId, scripts[i].circleId, scripts[i].statusElementId);
+                      await runScript(scripts[i].endpoint, scripts[i].resultDivId, scripts[i].circleId, scripts[i].statusElementId);
                     }
                     const endTime = new Date();
                     const duration = endTime - startTime;
