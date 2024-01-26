@@ -46,7 +46,7 @@ def home():
 
     # Si la méthode est GET ou si la connexion échoue, afficher la page d'accueil normale
     user = current_user()
-    print("deploy : ", deploy())
+    #print("deploy : ", deploy())
 
     # Si l'utilisateur n'est pas authentifié, rediriger vers la page de connexion
     #if not user:
@@ -219,7 +219,7 @@ def protected_resource():
     else:
         print("No access token found.")
     
-    run_code()
+    #run_code()
 
     return render_template('Appcicd.html', user=user, pipelines=pipelines)
 
