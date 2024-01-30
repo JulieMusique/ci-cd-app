@@ -82,9 +82,9 @@ class HistoryPipeline(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     idPipeline = db.Column(db.Integer)
     idUser = db.Column(db.Integer)
-    date = db.Column(db.Date)
+    date = db.Column(db.DateTime)
     status = db.Column(db.String(20))
-    stages_status = db.Column(db.Text)
+    stages_status = db.Column(db.String(50))
     duration = db.Column(db.String(20))
 
     def __str__(self):

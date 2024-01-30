@@ -16,9 +16,6 @@
     <!-- Styles CSS pour la mise en forme de la page -->
     <body>
         <div class="container">
-          {%- for pipeline in pipelines %}
-          <div>{{ pipeline }}</div>
-          {%- endfor %}
             <div class="Pipeline">
                 <table class="table">
                     <thead>
@@ -32,35 +29,33 @@
                       </tr>
                     </thead>
                     <tbody>
+                      {%- for pipeline in pipelines %}
                       <tr>
-                        <th  id="status-1" scope="row">Pas encore démarré</th>
-                        <td id="pipeline1">N/A</td>
+                        <th  id="status-1" scope="row">{{ pipeline.status }}</th>
+                        <td id="pipeline1">{{ pipeline.idPipeline }}</td>
                         <td>
                             <div id="stages">
-                                <span id="circle-1" class="circle circle-inactif">1</span>
-                                <span id="circle-2" class="circle circle-inactif">2</span>
-                                <span id="circle-3" class="circle circle-inactif">3</span>
-                                <span id="circle-4" class="circle circle-inactif">4</span>
-                                <span id="circle-5" class="circle circle-inactif">5</span>
-                                <div class="progress-bar">
-                                    <span class="indicator"></span>
-                                </div>
+                              {% if pipeline.stages_status is not none %}
+                                {% set result_list = pipeline.stages_status.split(',') %}
+                                {% for status in result_list%}
+                                      <span id="circle-{{ loop.index }}" class="circle {{ status }}">{{ loop.index }}</span>
+                                {% endfor %}
+                              {% else %}
+                                {% for i in range(5) %}
+                                  <span id="circle-{{ loop.index }}" class="circle circle-inactif">{{ loop.index }}</span>
+                                {% endfor %}
+                              {% endif %}
+                              <div class="progress-bar">
+                                <span class="indicator"></span>
+                              </div>
                             </div>
                         </td>
-                        <td id="startTime">N/A</td> <!-- Nouvelle cellule pour l'heure de début -->
+                        <td id="startTime"><div>{{ pipeline.date }}</div></td> <!-- Nouvelle cellule pour l'heure de début -->
 
-                        <td id="totalDuration">N/A</td>
+                        <td id="totalDuration">{{ pipeline.duration }}</td>
 
                       </tr>
-                      <tr>
-                        <th scope="row">2</th>
-                        <td>#1</td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <th scope="row">3</th>
-                        <td colspan="2">#2</td>
-                      </tr>
+                      {%- endfor %}
                     </tbody>
                   </table>
 
@@ -74,48 +69,63 @@
                   <div id="result5"></div>
                   
                   <script>
-                  function runScript(url, resultId) {
-
-                      alert(`Exécution de ${url}`);
-                      document.getElementById(resultId).innerHTML = "Action terminée";
+                    async function executerActions() {
+                      const status_stages = ["inactif", "inactif", "inactif", "inactif", "inactif"];
+                      let postResult = await post_data('/create_pipeline', "");
+                      console.log('hello');
+                      const startTime = new Date();
+                      document.getElementById('startTime').innerText = formatDateTime(startTime);
+                      const pipelineNumber = generateRandomAlphanumeric();
+                      document.getElementById('pipeline1').innerText = `#${pipelineNumber}`;
+                      const scripts = [
+                      { endpoint: "{{ url_for('.run_code') }}", resultDivId: 'result1', circleId: 'circle-1', statusElementId: 'status-1' },
+                      { endpoint: "{{ url_for('.run_second_code') }}", resultDivId: 'result2', circleId: 'circle-2', statusElementId: 'status-1' },
+                      { endpoint: "{{ url_for('.run_sonar_code') }}", resultDivId: 'result3', circleId: 'circle-3', statusElementId: 'status-1' },
+                      { endpoint: "{{ url_for('.create_dockers') }}", resultDivId: 'result4', circleId: 'circle-4', statusElementId: 'status-1' },
+                      { endpoint: "{{ url_for('.deploy') }}", resultDivId: 'result5', circleId: 'circle-5', statusElementId: 'status-1' }
+                      ];
+                  
+                      for (let i = 0; i < scripts.length; i++) {
+                        const result = await runScript(scripts[i].endpoint, scripts[i].resultDivId, scripts[i].circleId, scripts[i].statusElementId);
+                        status_stages[i] = result.statusState;
+                      }
+                      const endTime = new Date();
+                      const duration = endTime - startTime;
+                      document.getElementById('totalDuration').innerText = duration + ' millisecondes';
+                  
+                      console.log('Durée totale d\'exécution :', duration, 'millisecondes');
+                      let lastResult = await post_data('/last_user_pipeline', "");
+                      let data = {
+                          'id':lastResult,
+                          'status_stages': status_stages,
+                          'status' : status_stages[scripts.length-1],
+                          'duration': duration,
+                          'date': startTime
+                      };
+                      postResult = await post_data('/update_pipeline', data);
+                      if (postResult.statusState === "success") {
+                        // Handle success
+                      } else {
+                          // Handle failure
+                          console.error(postResult.statusError);
+                      }
                   }
                   
-                  async function executerActions() {
-                    const startTime = new Date();
-                    document.getElementById('startTime').innerText = formatDateTime(startTime);
-                    const pipelineNumber = generateRandomAlphanumeric();
-                    document.getElementById('pipeline1').innerText = `#${pipelineNumber}`;
-                    const scripts = [
-                    { endpoint: "{{ url_for('.run_code') }}", resultDivId: 'result1', circleId: 'circle-1', statusElementId: 'status-1' },
-                    { endpoint: "{{ url_for('.run_second_code') }}", resultDivId: 'result2', circleId: 'circle-2', statusElementId: 'status-1' },
-                    { endpoint: "{{ url_for('.run_sonar_code') }}", resultDivId: 'result3', circleId: 'circle-3', statusElementId: 'status-1' },
-                    { endpoint: "{{ url_for('.create_dockers') }}", resultDivId: 'result4', circleId: 'circle-4', statusElementId: 'status-1' },
-                    { endpoint: "{{ url_for('.deploy') }}", resultDivId: 'result5', circleId: 'circle-5', statusElementId: 'status-1' }
-                    ];
-                
-                    for (let i = 0; i < scripts.length; i++) {
-                      await runScript(scripts[i].endpoint, scripts[i].resultDivId, scripts[i].circleId, scripts[i].statusElementId);
-                    }
-                    const endTime = new Date();
-                    const duration = endTime - startTime;
-                    document.getElementById('totalDuration').innerText = duration + ' millisecondes';
-
-                    console.log('Durée totale d\'exécution :', duration, 'millisecondes');
-                }
-                function generateRandomAlphanumeric(length = 8) {
-                    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                    let result = '';
-                    for (let i = 0; i < length; i++) {
-                        const randomIndex = Math.floor(Math.random() * charset.length);
-                        result += charset.charAt(randomIndex);
-                    }
-                    return result;
-                }
-                function formatDateTime(dateTime) {
-                    const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
-                    return dateTime.toLocaleString('fr-FR', options);
-                }
-                  </script>
+                  function generateRandomAlphanumeric(length = 8) {
+                      const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                      let result = '';
+                      for (let i = 0; i < length; i++) {
+                          const randomIndex = Math.floor(Math.random() * charset.length);
+                          result += charset.charAt(randomIndex);
+                      }
+                      return result;
+                  }
+                  
+                  function formatDateTime(dateTime) {
+                      const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+                      return dateTime.toLocaleString('fr-FR', options);
+                  }
+                </script>
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
