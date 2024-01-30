@@ -1,30 +1,36 @@
+import json
 import os
 import subprocess
-from flask import flash, jsonify
+from flask import flash, jsonify, Blueprint, request, session, url_for, render_template, redirect
 import time
 from secrets import token_urlsafe
-from flask import Blueprint, request, session, url_for
-from flask import render_template, redirect
 import requests
+from sqlalchemy import desc
 from werkzeug.security import gen_salt
 from authlib.integrations.flask_oauth2 import current_token
 from authlib.oauth2 import OAuth2Error
 from .models import OAuth2Token, db, User, OAuth2Client, HistoryPipeline
 from .oauth2 import PasswordGrant, authorization, require_oauth
+from datetime import datetime
 
 bp = Blueprint('home', __name__)
-
 
 def current_user():
     if 'id' in session:
         uid = session['id']
         return User.query.get(uid)
     return None
- 
+
 def current_user_pipeline():
     if 'id' in session:
         uid = session['id']
         return HistoryPipeline.query.filter_by(idUser = uid)
+    return None
+
+def last_user_pipeline():
+    if 'id' in session:
+        uid = session['id']
+        return HistoryPipeline.query.filter_by(idUser = uid).order_by(desc(column="id")).first()
     return None
 
 @bp.route('/', methods=('GET', 'POST'))
@@ -46,7 +52,6 @@ def home():
 
     # Si la méthode est GET ou si la connexion échoue, afficher la page d'accueil normale
     user = current_user()
-    #print("deploy : ", deploy())
 
     # Si l'utilisateur n'est pas authentifié, rediriger vers la page de connexion
     #if not user:
@@ -142,24 +147,37 @@ def create_pipeline():
     user = current_user()
 
     if request.method == 'GET':
-        return render_template('Appcicd.html')
+        return redirect('/protected')
 
     existing_user = User.query.filter_by(username=user.username).first()
-
     if existing_user:
-        
-        # L'utilisateur n'existe pas, créons un nouvel utilisateur et un client associé
         pipeline_id = gen_salt(24)
-        pipeline_date = time.time()
         pipeline_idUser = user.id
-        pipeline = HistoryPipeline(idPipeline=pipeline_id, idUser=pipeline_idUser, date=pipeline_date)
+        pipeline = HistoryPipeline(idPipeline=pipeline_id, idUser=pipeline_idUser, status="", stages_status="", duration="")
         db.session.add(pipeline)
+        db.session.commit()
+        return redirect('/protected')
+    else:
+        flash(f"L'utilisateur '{user.username}' n'existe pas.", "danger")
+        return render_template('create_user.html')
+
+@bp.route('/update_pipeline', methods=('GET', 'POST'))
+def update_pipeline():
+    user = current_user()
+
+    if request.method == 'GET':
+        return redirect('/protected')
+
+    existing_user = User.query.filter_by(username=user.username).first()
+    if existing_user:
+        data = request.get_json()  # Retrieve JSON data
+        existing_pipeline = HistoryPipeline.query.filter_by(id=data["id"]).update(duration=data["duration"]+"millisecondes", status=data["status"], status_stages=json.dumps(data["status_stages"]))
         db.session.commit()
     else:
         flash(f"L'utilisateur '{user.username}' n'existe pas.", "danger")
         return render_template('create_user.html')
 
-    return redirect('/')
+    return redirect('/protected')
 
 @bp.route('/oauth/authorize', methods=['GET', 'POST'])
 def authorize():
@@ -218,8 +236,6 @@ def protected_resource():
             return redirect('/')
     else:
         print("No access token found.")
-    
-    #run_code()
 
     return render_template('Appcicd.html', user=user, pipelines=pipelines)
 
@@ -259,7 +275,7 @@ def execute_script(script_path, result_div_id):
         print(f'child process exited with code {exit_code}')
 
         # Utilisez outputdata au lieu de output_data
-        output_data = outputdata.decode()
+        output_data = outputdata.decode(encoding="ISO-8859-1")
 
         return jsonify(output=output_data, exitCode=exit_code, resultDivId=result_div_id)
     except Exception as e:
