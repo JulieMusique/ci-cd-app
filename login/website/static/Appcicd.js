@@ -5,8 +5,8 @@ async function runScript(endpoint, resultDivId, circleId, statusElementId) {
     let statusHttp = "En cours";
     let statusState = "running";
     let statusError = "";
-
-    outputDiv.innerHTML = "<p>Exécution du script...</p>";
+    var circleNum = circleId.match(/\d+/)[0];
+    outputDiv.innerHTML = "<p><i class='ri-loader-line ri-spin'></i> Exécution du script numero °" + circleNum + " en cours..</p>";
     circle.classList.remove('circle-inactif');
     circle.classList.add('circle-running');
     statusElement.innerText = "En cours";
@@ -25,13 +25,15 @@ async function runScript(endpoint, resultDivId, circleId, statusElementId) {
                 statusHttp = "Terminé";
                 statusState = "passed";
             } else {
-                outputDiv.innerHTML = "<p style='color: red;'>Script a échoué avec le code de sortie : " + data.exitCode + "</p>";
+                outputDiv.innerHTML = "<p style='color: red;'>Script a échoué </p>";
+                console.log(data)
                 circle.classList.remove('circle-running');
                 circle.classList.add('circle-failed');
                 statusElement.innerText = "Terminé (Échec)"; // Set status to "Terminé (Échec)" on failure
                 statusHttp = "Terminé (Échec)";
                 statusState = "failed";
                 statusError = "Script a échoué avec le code de sortie : " + data.exitCode;
+                statusError = "Script a échoué ";
             }
         } else {
             outputDiv.innerHTML = "<p style='color: red;'>Erreur HTTP : " + response.status + " " + response.statusText + "</p>";

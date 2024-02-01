@@ -1,7 +1,6 @@
 import subprocess
 import sys
 import os
-
 def run_command(command, start_message, success_message, failure_message):
     print(start_message)
     print("Executing command:", command)
@@ -20,8 +19,7 @@ def run_command(command, start_message, success_message, failure_message):
     )
 
 def main():
-    # Changement de répertoire
-    #testing
+
     os.chdir("Delivecrous-back")
     clean_command = "mvn clean"
     return_code, _, _ = run_command(

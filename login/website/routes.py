@@ -56,16 +56,12 @@ def home():
             session['id'] = user.id
             flash('Login successful', 'success')
             create_client_for_user(user)
-            return redirect('/')
+            return redirect('/protected')
         else:
             flash('Invalid username or password', 'danger')
 
     # Si la méthode est GET ou si la connexion échoue, afficher la page d'accueil normale
     user = current_user()
-
-    # Si l'utilisateur n'est pas authentifié, rediriger vers la page de connexion
-    #if not user:
-    #    return render_template('SignIn.html')
 
     all_clients = OAuth2Client.query.all() if user and user.isAdmin else []
     print("Tous les clients:", all_clients)
@@ -117,8 +113,8 @@ def create_client_for_user(user):
     print("token : ", token )
     db.session.add(token)
     db.session.commit()
-    
-    flash(f"Client '{client_id}' créé avec succès pour l'utilisateur '{user.username}'.", "success")
+    redirect('/protected')
+    #flash(f"Client '{client_id}' créé avec succès pour l'utilisateur '{user.username}'.", "success")
 
 @bp.route('/logout')
 def logout():
@@ -144,13 +140,13 @@ def create_user():
     else:
         # L'utilisateur n'existe pas, créons un nouvel utilisateur et un client associé
         new_user = User(username=username)
-        new_user.set_password(password)  # Utilisez la fonction set_password pour hacher le mot de passe
+        new_user.set_password(password)
         db.session.add(new_user)
         db.session.commit()
 
         create_client_for_user(new_user)
 
-    return redirect('/')
+    return redirect('/protected')
 
 @bp.route('/create_pipeline', methods=('GET', 'POST'))
 def create_pipeline():
@@ -244,7 +240,13 @@ def revoke_token():
 @bp.route('/protected', methods=['GET'])
 def protected_resource():
     user = current_user()
-
+    all_clients = OAuth2Client.query.all() if user and user.isAdmin else []
+    #print("Tous les clients:", all_clients)
+    if user:
+        clients = OAuth2Client.query.filter_by(user_id=user.id).all()
+        print("Clients associés à l'utilisateur:", clients)
+    else:
+        clients = []
     # Vérifiez si l'utilisateur est authentifié
     if not user:
         print('Unauthorized')
@@ -259,7 +261,7 @@ def protected_resource():
     print("token contains admin's rights ? ",a )
 
     if last_token:
-        if 'complete access' in last_token.scope:
+        if 'complete access' or 'read only' in last_token.scope:
             print("Access granted to protected resource for user:", user.username)
             print("Access Token:", last_token.access_token)
             print("Scope:", last_token.scope)
@@ -270,7 +272,7 @@ def protected_resource():
     else:
         print("No access token found.")
 
-    return render_template('Appcicd.html', user=user, pipelines=pipelines)
+    return render_template('Appcicd.html', user=user, pipelines=pipelines, clients=clients, all_clients=all_clients)
 
 @bp.route('/run_code')
 def run_code():
