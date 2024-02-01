@@ -24,14 +24,24 @@ def current_user():
 def current_user_pipeline():
     if 'id' in session:
         uid = session['id']
-        return HistoryPipeline.query.filter_by(idUser = uid)
+        return HistoryPipeline.query.filter_by(idUser = uid).order_by(desc(column="id")).all()
     return None
 
+@bp.route('/last_user_pipeline', methods=['GET'])
 def last_user_pipeline():
     if 'id' in session:
         uid = session['id']
-        return HistoryPipeline.query.filter_by(idUser = uid).order_by(desc(column="id")).first()
-    return None
+        pipeline_data = HistoryPipeline.query.filter_by(idUser=uid).order_by(desc(column="id")).first()
+        if pipeline_data:
+            response_data = {
+                'id': pipeline_data.id,
+                'status': pipeline_data.status,
+                'stages_status': pipeline_data.stages_status,
+                'duration': pipeline_data.duration,
+                'date': pipeline_data.date.strftime("%Y-%m-%dT%H:%M:%S.%fZ") if pipeline_data.date else None
+            }
+            return jsonify(response_data)
+    return jsonify({'error': 'User not authenticated'}), 401
 
 @bp.route('/', methods=('GET', 'POST'))
 def home():
@@ -147,12 +157,22 @@ def create_pipeline():
 
     existing_user = User.query.filter_by(username=user.username).first()
     if existing_user:
+        data = request.get_json()
         pipeline_id = gen_salt(24)
         pipeline_idUser = user.id
-        pipeline = HistoryPipeline(idPipeline=pipeline_id, idUser=pipeline_idUser, status="", stages_status="", duration="")
+        pipeline = HistoryPipeline(idPipeline=pipeline_id, idUser=pipeline_idUser, date=datetime.strptime(data["date"], "%Y-%m-%dT%H:%M:%S.%fZ"), status="En cours", stages_status="", duration="")
         db.session.add(pipeline)
         db.session.commit()
-        return redirect('/protected')
+        serializable_data = {
+        'id':  pipeline_id,
+        'idPipeline': pipeline.idPipeline,
+        'idUser': pipeline.idUser,
+        'date': pipeline.date.isoformat(),
+        'status': pipeline.status,
+        'stages_status': pipeline.stages_status,
+        'duration': pipeline.duration
+    }
+        return jsonify({'newPipeline':serializable_data})
     else:
         flash(f"L'utilisateur '{user.username}' n'existe pas.", "danger")
         return render_template('create_user.html')
@@ -165,10 +185,23 @@ def update_pipeline():
         return redirect('/protected')
 
     existing_user = User.query.filter_by(username=user.username).first()
+    # Assuming data is received as JSON in the request
     if existing_user:
-        data = request.get_json()  # Retrieve JSON data
-        existing_pipeline = HistoryPipeline.query.filter_by(id=data["id"]).update(duration=data["duration"]+"millisecondes", status=data["status"], status_stages=json.dumps(data["status_stages"]))
-        db.session.commit()
+        data = request.get_json()
+
+        # Check if 'id' key is present in data
+        if 'id' in data:
+            pipeline_id = data['id']
+            existing_pipeline = HistoryPipeline.query.filter_by(id=pipeline_id).first()
+
+            if existing_pipeline:
+                # Update the existing pipeline
+                existing_pipeline.duration = str(data["duration"]) + " milliseconds"
+                existing_pipeline.status = data["status"]
+                existing_pipeline.stages_status = json.dumps(data["stages_status"])
+                db.session.commit()
+            else:
+                flash(f"Pipeline with ID {pipeline_id} not found.", "danger")
     else:
         flash(f"L'utilisateur '{user.username}' n'existe pas.", "danger")
         return render_template('create_user.html')
@@ -222,7 +255,7 @@ def protected_resource():
     # Récupérez le token actuel
     last_token = OAuth2Token.get_last_token_for_user(user.id)
     pipelines = current_user_pipeline()
-
+    
     print("Last token for user:", last_token)
     a = True if 'complete access' in last_token.scope else False
     print("token contains admin's rights ? ",a )

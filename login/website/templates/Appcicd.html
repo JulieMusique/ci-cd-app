@@ -41,14 +41,14 @@
                     <tbody>
                       {%- for pipeline in pipelines %}
                       <tr>
-                        <th  id="status-1" scope="row">{{ pipeline.status }}</th>
-                        <td id="pipeline1">{{ pipeline.id }}</td>
+                        <th id="status-{{ loop.index }}" scope="row">{{ pipeline.status }}</th>
+                        <td id="pipeline{{ loop.index }}">{{ pipeline.idPipeline }}</td>
                         <td>
                             <div id="stages">
-                              {% if pipeline.stages_status is not none %}
+                              {% if pipeline.stages_status|length > 0 %}
                                 {% set result_list = pipeline.stages_status.split(',') %}
-                                {% for status in result_list%}
-                                      <span id="circle-{{ loop.index }}" class="circle {{ status }}">{{ loop.index }}</span>
+                                {% for status in result_list %}
+                                    <span id="circle-{{ loop.index }}" class="circle circle-{{ status | replace('[', '') | replace(']', '') | replace('\"', '') | trim }}">{{ loop.index }}</span>
                                 {% endfor %}
                               {% else %}
                                 {% for i in range(5) %}
@@ -61,8 +61,7 @@
                             </div>
                         </td>
                         <td id="startTime"><div>{{ pipeline.date }}</div></td> 
-
-                        <td id="totalDuration">{{ pipeline.duration }}</td>
+                        <td id="totalDuration-{{ loop.index }}">{{ pipeline.duration }}</td>
                         <td id="detail"> 
                           <div id="result1"></div>
                           <div id="result2"></div>
@@ -110,55 +109,54 @@
                   {% endif %}
                   {% endfor %}
                 
-
+                    </div>
+                  </div>
                   <script>
-
-                   async function executerActions() {
-
-    const status_stages = ["inactif", "inactif", "inactif", "inactif", "inactif"];
-    let postResult = await post_data('/create_pipeline', "");
-    console.log('hello');
-    const startTime = new Date();
-    document.getElementById('startTime').innerText = formatDateTime(startTime);
-    const pipelineNumber = generateRandomAlphanumeric();
-    document.getElementById('pipeline1').innerText = `#${pipelineNumber}`;
-    const scripts = [
-        { endpoint: "{{ url_for('.run_code') }}", resultDivId: 'result1', circleId: 'circle-1', statusElementId: 'status-1' },
-        { endpoint: "{{ url_for('.run_second_code') }}", resultDivId: 'result2', circleId: 'circle-2', statusElementId: 'status-1' },
-        { endpoint: "{{ url_for('.run_sonar_code') }}", resultDivId: 'result3', circleId: 'circle-3', statusElementId: 'status-1' },
-        { endpoint: "{{ url_for('.create_dockers') }}", resultDivId: 'result4', circleId: 'circle-4', statusElementId: 'status-1' },
-        { endpoint: "{{ url_for('.deploy') }}", resultDivId: 'result5', circleId: 'circle-5', statusElementId: 'status-1' }
-    ];
-
-
-    for (let i = 0; i < scripts.length; i++) {
-        const result = await runScript(scripts[i].endpoint, scripts[i].resultDivId, scripts[i].circleId, scripts[i].statusElementId);
-        status_stages[i] = result.statusState;
-    }
-    const endTime = new Date();
-    const duration = endTime - startTime;
-    const durationInSeconds = Math.floor(duration / 1000);
-    const minutes = Math.floor(durationInSeconds / 60);
-    const seconds = durationInSeconds % 60;
-    document.getElementById('totalDuration').innerText = `${minutes} minutes et ${seconds} secondes`;
-      
-    console.log('Durée totale d\'exécution :', duration, 'millisecondes');
-    let data = {
-        'id': pipelineNumber,
-        'status_stages': status_stages,
-        'status': status_stages[scripts.length - 1],
-        'duration': duration,
-        'date': startTime
-    };
-    postResult = await post_data('/update_pipeline', data);
-    if (postResult.statusState === "success") {
-        // Handle success
-    } else {
-        // Handle failure
-        console.error(postResult.statusError);
-    }
-}
-
+                    async function executerActions() {
+                      const status_stages = ["inactif", "inactif", "inactif", "inactif", "inactif"];
+                      const startTime = new Date();
+                      let data = {
+                        'date': startTime
+                      } 
+                      let response = await post_data('/create_pipeline', data);
+                      if (response.statusState == "failed") {
+                        throw new Error(`HTTP error! ${response.statusError}`);
+                      }
+                      addNewPipelineRow(response.data.newPipeline);
+                      const pipelineNumber = generateRandomAlphanumeric();
+                      const scripts = [
+                      { endpoint: "{{ url_for('.run_code') }}", resultDivId: 'result1', circleId: 'circle-1', statusElementId: `status-${response.data.newPipeline.id}` },
+                      { endpoint: "{{ url_for('.run_second_code') }}", resultDivId: 'result2', circleId: 'circle-2', statusElementId: `status-${response.data.newPipeline.id}` },
+                      { endpoint: "{{ url_for('.run_sonar_code') }}", resultDivId: 'result3', circleId: 'circle-3', statusElementId: `status-${response.data.newPipeline.id}` },
+                      { endpoint: "{{ url_for('.create_dockers') }}", resultDivId: 'result4', circleId: 'circle-4', statusElementId: `status-${response.data.newPipeline.id}` },
+                      { endpoint: "{{ url_for('.deploy') }}", resultDivId: 'result5', circleId: 'circle-5', statusElementId: `status-${response.data.newPipeline.id}` }
+                      ];
+                  
+                      for (let i = 0; i < scripts.length; i++) {
+                        const result = await runScript(scripts[i].endpoint, scripts[i].resultDivId, scripts[i].circleId, scripts[i].statusElementId);
+                        status_stages[i] = result.statusState;
+                      }
+                      const endTime = new Date();
+                      const duration = endTime - startTime;
+                      console.log('Durée totale d\'exécution :', duration, 'millisecondes');
+                      response = await fetch('/last_user_pipeline');
+                      if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                      }
+                      const lastResult = await response.json();
+                      document.getElementById('totalDuration').innerText = duration + ' millisecondes';
+                      data = {
+                          'id': lastResult.id,
+                          'stages_status': status_stages,
+                          'status' : status_stages[scripts.length-1],
+                          'duration': duration,
+                          'date': startTime
+                      };
+                      postResult = await post_data('/update_pipeline', data);
+                      if (postResult.statusState == "failed") {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                      }
+                  }
                   
                   function generateRandomAlphanumeric(length = 8) {
                       const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -175,9 +173,7 @@
                       return dateTime.toLocaleString('fr-FR', options);
                   }
                 </script>
-            </div>
-        </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    </body>
-
+        <script src="../static/Appcicd.js" defer></script>
+      </body>
 </html>
