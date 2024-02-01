@@ -12,7 +12,8 @@ from authlib.oauth2 import OAuth2Error
 from .models import OAuth2Token, db, User, OAuth2Client, HistoryPipeline
 from .oauth2 import PasswordGrant, authorization, require_oauth
 from datetime import datetime
-
+import random
+import string
 bp = Blueprint('home', __name__)
 
 def current_user():
@@ -147,18 +148,22 @@ def create_user():
         create_client_for_user(new_user)
 
     return redirect('/protected')
-
+def generate_random_alphanumeric(length=8):
+    charset = string.ascii_letters + string.digits
+    result = ''.join(random.choice(charset) for _ in range(length))
+    return result
 @bp.route('/create_pipeline', methods=('GET', 'POST'))
 def create_pipeline():
     user = current_user()
 
     if request.method == 'GET':
         return redirect('/protected')
+    pipelineNumber = generate_random_alphanumeric();
 
     existing_user = User.query.filter_by(username=user.username).first()
     if existing_user:
         data = request.get_json()
-        pipeline_id = gen_salt(24)
+        pipeline_id = '#' + str(pipelineNumber)
         pipeline_idUser = user.id
         pipeline = HistoryPipeline(idPipeline=pipeline_id, idUser=pipeline_idUser, date=datetime.strptime(data["date"], "%Y-%m-%dT%H:%M:%S.%fZ"), status="En cours", stages_status="", duration="")
         db.session.add(pipeline)
