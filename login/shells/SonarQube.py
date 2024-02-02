@@ -27,7 +27,7 @@ sonar_command = "mvn verify sonar:sonar \
   -Dsonar.projectKey=AppFood \
   -Dsonar.projectName='AppFood' \
   -Dsonar.host.url=http://localhost:9000 \
-  -Dsonar.token=sqp_69ba18dfd6dea3a8962851378b1473b6d4019a39"
+  -Dsonar.token=sqp_c2e305fa119f6236206edd9efe6e7c03029c72ad"
 
 return_code, output, error = run_command(
     sonar_command,
