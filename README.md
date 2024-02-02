@@ -1,6 +1,10 @@
 # ci-cd-app
 # Guide d'utilisation - Configuration et Utilisation
-
+## Importation de la VM
+- Téléchargez ou copiez le fichier d'exportation de la machine virtuelle (appliance)
+- Importer la machine virtuelle :
+    Dans la fenêtre principale de VirtualBox, cliquez sur "Fichier" dans la barre de menu, puis sélectionnez "Importer un appareil virtuel".
+    Dans la boîte de dialogue qui s'ouvre, recherchez et sélectionnez le fichier telechargé .ova
 ## Connexion à la VM
 - Pour accéder à la machine virtuelle (VM), utilisez les identifiants suivants :
   - **Nom d'utilisateur :** admin
