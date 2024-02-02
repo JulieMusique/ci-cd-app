@@ -10,7 +10,7 @@ def verifier_et_creer_dossier(chemin):
     if not os.path.exists(chemin):
         print(f"the repository {chemin} does not exist")
 
-# Partie pour le backend
+#Partie pour le backend
 pathback = './DeliveCrous-back'
 verifier_et_creer_dossier(pathback)
 backDocker = 'dockerfile'
@@ -24,7 +24,7 @@ EXPOSE 8080
 
 creer_fichier(pathback, backDocker, contenuback)
 
-# Partie pour le frontend
+#Partie pour le frontend
 pathfront = './DeliveCrous-front/flutter_food_delivery_ui_kit-master'
 verifier_et_creer_dossier(pathfront)
 frontDocker = 'dockerfile'
