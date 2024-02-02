@@ -15,11 +15,15 @@
 3. Cliquez sur Modifier les paramètres de la carte.
 4. Localisez et double-cliquez sur "VirtualBox Host-Only Network".
 5. Dans les propriétés, configurez comme indiqué dans la capture d'écran fournie.
-6. Validez et enregistrez les modifications.
+   ![image](https://github.com/JulieMusique/ci-cd-app/assets/131668308/8036d052-f4c8-49bb-8973-c9927007f295)
+
+7. Validez et enregistrez les modifications.
 
 ### Configuration de l'interface réseau (VirtualBox)
 1. Dans VirtualBox, accédez à Fichier > Outils > Gestionnaire de Réseau (Network Manager).
-2. Configurez l'interface comme illustré dans la capture d'écran fournie.
+2. Configurez l'interface comme illustré dans les capture d'écran fournies.
+![image](https://github.com/JulieMusique/ci-cd-app/assets/131668308/60aa5369-881e-47a3-8aa9-30a7d7b58d26)
+![image](https://github.com/JulieMusique/ci-cd-app/assets/131668308/f54781a5-afd5-4b90-9353-f18d6be772ed)
 
 ## Configuration de SonarQube
 - Pour configurer SonarQube, suivez les étapes ci-dessous :
@@ -44,6 +48,7 @@ mvn clean verify sonar:sonar \
 -Dsonar.projectName='AppFood' \
 -Dsonar.host.url=http://localhost:9000 \
 -Dsonar.token=token
+```
 
 ## Lancement du serveur
 Lancez la commande "source venv/Scripts/activate pour activer l'environnement virtuel Python".
