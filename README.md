@@ -44,3 +44,20 @@ mvn clean verify sonar:sonar \
 -Dsonar.projectName='AppFood' \
 -Dsonar.host.url=http://localhost:9000 \
 -Dsonar.token=token
+
+## Lancement du serveur
+Lancez la commande "source venv/Scripts/activate pour activer l'environnement virtuel Python".
+Lancez la commande "pip install -R requirements.txt" pour installer les paquets nécessaires au lancement de l'application.
+Déplacez vous dans le répertoire login en lançant la commande : "cd login/".
+Pour finir, avec la commande "flask run" vous pouvez lancer l'application.
+Pour accéder à l'application, mettez "http://localhost:5000/" dans votre navigateur.
+
+## Connection
+Vous avez la possibilité de vous connecter aux utilisateurs suivant:
+- username: admin, password: admin
+- username: user, password: user
+Sinon vous pouvez créer un nouvel utilisateur grâce à la page de création d'un nouvel utilisateur.
+
+## Page d'accueil
+![image](https://github.com/JulieMusique/ci-cd-app/assets/126576943/9813a1f3-1d1d-48cf-a0d3-b2082228b708)
+
