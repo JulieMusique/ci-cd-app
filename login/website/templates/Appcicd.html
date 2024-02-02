@@ -26,6 +26,7 @@
           <h3 style="margin-top: 5px;">Welcome Back <strong style="color: red;">@{{ user.username }}</strong> </h3>
           </div>        
         <div><h3 style="margin-top: 5px;">Tous les pipelines</h3>
+          <button id="bouton" onclick="arreterPipeline()" style="background-color: Black; margin-left: 5px;">Arrêter la pipeline</button>
           <button id="bouton" onclick="executerActions()">Lancer la pipeline</button></div>
             <div class="Pipeline">
                 <table class="table">
@@ -51,7 +52,7 @@
                                     <span id="circle-{{ loop.index }}" class="circle circle-{{ status | replace('[', '') | replace(']', '') | replace('\"', '') | trim }}">{{ loop.index }}</span>
                                 {% endfor %}
                               {% else %}
-                                {% for i in range(5) %}
+                                {% for i in range(6) %}
                                   <span id="circle-{{ loop.index }}" class="circle circle-inactif">{{ loop.index }}</span>
                                 {% endfor %}
                               {% endif %}
@@ -66,8 +67,10 @@
                           <div id="result1"></div>
                           <div id="result2"></div>
                           <div id="result3"></div>
-                          <div id="result4"></div>
-                          <div id="result5"></div></td>
+                          <div id="result4"></div>                        
+                          <div id="result5"></div>
+                          <div id="result5"></div>
+                        </td>
                       </tr>
                       {%- endfor %}
                     </tbody>
@@ -123,7 +126,6 @@
                         throw new Error(`HTTP error! ${response.statusError}`);
                       }
                       addNewPipelineRow(response.data.newPipeline);
-                      const pipelineNumber = generateRandomAlphanumeric();
                       const scripts = [
                       { endpoint: "{{ url_for('.run_code') }}", resultDivId: 'result1', circleId: 'circle-1', statusElementId: `status-${response.data.newPipeline.id}` },
                       { endpoint: "{{ url_for('.run_second_code') }}", resultDivId: 'result2', circleId: 'circle-2', statusElementId: `status-${response.data.newPipeline.id}` },
@@ -148,7 +150,7 @@
                       data = {
                           'id': lastResult.id,
                           'stages_status': status_stages,
-                          'status' : status_stages[scripts.length-1],
+                          'status' : result.statusHttp,
                           'duration': duration,
                           'date': startTime
                       };
@@ -156,22 +158,26 @@
                       if (postResult.statusState == "failed") {
                         throw new Error(`HTTP error! Status: ${response.status}`);
                       }
-                  }
+                    }              
                   
-                  function generateRandomAlphanumeric(length = 8) {
-                      const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                      let result = '';
-                      for (let i = 0; i < length; i++) {
-                          const randomIndex = Math.floor(Math.random() * charset.length);
-                          result += charset.charAt(randomIndex);
+                    function formatDateTime(dateTime) {
+                        const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+                        return dateTime.toLocaleString('fr-FR', options);
+                    }
+               
+                    function arreterPipeline() {
+                      let idPipeline = document.getElementById("stop-button").dataset.id;
+                      alert("Pipeline arrêtée !");
+                    }
+
+                    window.addEventListener('load', async function() {
+                      try {
+                          const lastPipeline = await get_data('/last_user_pipeline');
+                          updatePipelineStatus(lastPipeline);
+                      } catch (error) {
+                          console.error('Error loading last pipeline:', error.message);
                       }
-                      return result;
-                  }
-                  
-                  function formatDateTime(dateTime) {
-                      const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
-                      return dateTime.toLocaleString('fr-FR', options);
-                  }
+                  });
                 </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
         <script src="../static/Appcicd.js" defer></script>
