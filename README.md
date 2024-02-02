@@ -8,7 +8,7 @@
 ## Connexion à la VM
 - Pour accéder à la machine virtuelle (VM), utilisez les identifiants suivants :
   - **Nom d'utilisateur :** admin
-  - **Mot de passe :** progtr00
+  - **Mot de passe :** Progtr00
 
 ## Vérification de la configuration réseau
 - Assurez-vous que la machine est configurée avec un réseau privé hôte. Si ce n'est pas le cas, veuillez suivre les étapes ci-dessous pour configurer le réseau correctement.
@@ -33,7 +33,7 @@
 - Pour configurer SonarQube, suivez les étapes ci-dessous :
 
 1. Lancez Docker Desktop.
-2. Exécutez la commande suivante dans un terminal : ```bash docker run -d --name sonarqube -p 9000:9000 sonarqube:latest ```
+2. Exécutez la commande suivante dans un terminal : ``` docker run -d --name sonarqube -p 9000:9000 sonarqube:latest ```
 3. Connectez-vous à SonarQube avec les identifiants suivants :
 - **Utilisateur :** admin
 - **Mot de passe :** admin
