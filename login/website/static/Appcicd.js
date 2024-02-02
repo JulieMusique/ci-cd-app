@@ -24,6 +24,7 @@ async function runScript(endpoint, resultDivId, circleId, statusElementId) {
                 statusElement.innerText = "Terminé"; 
                 statusHttp = "Terminé";
                 statusState = "passed";
+                return {statusHttp, statusState, statusError};
             } else {
                 outputDiv.innerHTML = "<p style='color: red;'>Script a échoué </p>";
                 console.log(data)
@@ -33,8 +34,7 @@ async function runScript(endpoint, resultDivId, circleId, statusElementId) {
                 statusHttp = "Terminé (Échec)";
                 statusState = "failed";
                 statusError = "Script a échoué avec le code de sortie : " + data.exitCode;
-                statusError = "Script a échoué ";
-                return;
+                return {statusHttp, statusState, statusError};
             }
         } else {
             outputDiv.innerHTML = "<p style='color: red;'>Erreur HTTP : " + response.status + " " + response.statusText + "</p>";
@@ -44,7 +44,7 @@ async function runScript(endpoint, resultDivId, circleId, statusElementId) {
             statusHttp = "Terminé (Erreur HTTP)";
             statusState = "failed";
             statusError = "Erreur HTTP : " + response.status + " " + response.statusText;
-            return;
+            return {statusHttp, statusState, statusError};
         }
     } catch (error) {
         outputDiv.innerHTML = "<p style='color: red;'>Une erreur s'est produite : " + error + "</p>";
@@ -54,9 +54,8 @@ async function runScript(endpoint, resultDivId, circleId, statusElementId) {
         statusHttp = "Terminé (Erreur interne)";
         statusState = "failed";
         statusError = "Une erreur s'est produite : " + error;
-        return;
+        return {statusHttp, statusState, statusError};
     }
-    return {statusState, statusError};
 }
 
 async function post_data(endpoint, saisie){
