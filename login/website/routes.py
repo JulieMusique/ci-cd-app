@@ -28,6 +28,9 @@ def current_user_pipeline():
         return HistoryPipeline.query.filter_by(idUser = uid).order_by(desc(column="id")).all()
     return None
 
+def all_pipelines():
+    return HistoryPipeline.query.order_by(desc(column="id")).all()
+
 @bp.route('/last_user_pipeline', methods=['GET'])
 def last_user_pipeline():
     if 'id' in session:
@@ -115,13 +118,12 @@ def create_client_for_user(user):
     db.session.add(token)
     db.session.commit()
     redirect('/protected')
-    #flash(f"Client '{client_id}' créé avec succès pour l'utilisateur '{user.username}'.", "success")
 
 @bp.route('/logout')
 def logout():
     del session['id']
+    flash('Logout successful', 'success')
     return redirect('/')
-
 
 @bp.route('/create_user', methods=('GET', 'POST'))
 def create_user():
@@ -148,17 +150,20 @@ def create_user():
         create_client_for_user(new_user)
 
     return redirect('/protected')
+
 def generate_random_alphanumeric(length=8):
     charset = string.ascii_letters + string.digits
     result = ''.join(random.choice(charset) for _ in range(length))
     return result
+
 @bp.route('/create_pipeline', methods=('GET', 'POST'))
 def create_pipeline():
     user = current_user()
 
     if request.method == 'GET':
         return redirect('/protected')
-    pipelineNumber = generate_random_alphanumeric();
+    
+    pipelineNumber = generate_random_alphanumeric()
 
     existing_user = User.query.filter_by(username=user.username).first()
     if existing_user:
@@ -169,14 +174,14 @@ def create_pipeline():
         db.session.add(pipeline)
         db.session.commit()
         serializable_data = {
-        'id':  pipeline_id,
-        'idPipeline': pipeline.idPipeline,
-        'idUser': pipeline.idUser,
-        'date': pipeline.date.isoformat(),
-        'status': pipeline.status,
-        'stages_status': pipeline.stages_status,
-        'duration': pipeline.duration
-    }
+            'id':  pipeline_id,
+            'idPipeline': pipeline.idPipeline,
+            'idUser': pipeline.idUser,
+            'date': pipeline.date.isoformat(),
+            'status': pipeline.status,
+            'stages_status': pipeline.stages_status,
+            'duration': pipeline.duration
+        }
         return jsonify({'newPipeline':serializable_data})
     else:
         flash(f"L'utilisateur '{user.username}' n'existe pas.", "danger")
@@ -259,7 +264,11 @@ def protected_resource():
     
     # Récupérez le token actuel
     last_token = OAuth2Token.get_last_token_for_user(user.id)
-    pipelines = current_user_pipeline()
+    
+    if user.isAdmin:
+        pipelines = all_pipelines()
+    else:
+        pipelines = current_user_pipeline()
     
     print("Last token for user:", last_token)
     a = True if 'complete access' in last_token.scope else False

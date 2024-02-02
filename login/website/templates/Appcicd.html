@@ -1,185 +1,188 @@
 <!DOCTYPE html>
 <html lang="fr">
+  <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>DevOps Project PipelinePage</title>
+      <link href="../static/Appcicdd.css" type="text/css" rel="stylesheet"/>
+      <link
+          href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
+          rel="stylesheet">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container" style="overflow-y: auto; max-height: 100vh">
+  
+      <div>
+        <button id="bouton" onclick="logout()" style="background-color: red; margin-top: 5px;">Se déconnecter</button>
+        <h3 style="margin-top: 5px;">Welcome Back <strong style="color: red;">@{{ user.username }}</strong> </h3>
+      </div> 
 
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>DevOps Project PipelinePage</title>
-        <link href="../static/Appcicdd.css" type="text/css" rel="stylesheet"/>
-        <link
-            href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
-            rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-        <script src="../static/Appcicd.js" defer></script>
-    </head>
-    <body>
-        <div class="container" style="overflow-y: auto; max-height: 100vh">
-      
-        <div><button id="bouton" style="background-color: red; margin-top: 5px;">Se déconnecter</button>
-
-          <script>
-          document.getElementById("bouton").addEventListener("click", function() {
-              window.location.href = "{{ url_for('.logout') }}";
-          });
-          </script>
-          <h3 style="margin-top: 5px;">Welcome Back <strong style="color: red;">@{{ user.username }}</strong> </h3>
-          </div>        
-        <div><h3 style="margin-top: 5px;">Tous les pipelines</h3>
-          <button id="bouton" onclick="arreterPipeline()" style="background-color: Black; margin-left: 5px;">Arrêter la pipeline</button>
-          <button id="bouton" onclick="executerActions()">Lancer la pipeline</button></div>
-            <div class="Pipeline">
-                <table class="table">
-                    <thead>
-                      <tr>
-                        <th scope="col">Status</th>
-                        <th scope="col">Pipeline</th>
-                        <th scope="col">Stages</th>
-                        <th scope="col">Date</th>
-                        <th scope="col">Duration</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {%- for pipeline in pipelines %}
-                      <tr>
-                        <th id="status-{{ loop.index }}" scope="row">{{ pipeline.status }}</th>
-                        <td id="pipeline{{ loop.index }}">{{ pipeline.idPipeline }}</td>
-                        <td>
-                            <div id="stages">
-                              {% if pipeline.stages_status|length > 0 %}
-                                {% set result_list = pipeline.stages_status.split(',') %}
-                                {% for status in result_list %}
-                                    <span id="circle-{{ loop.index }}" class="circle circle-{{ status | replace('[', '') | replace(']', '') | replace('\"', '') | trim }}">{{ loop.index }}</span>
-                                {% endfor %}
-                              {% else %}
-                                {% for i in range(6) %}
-                                  <span id="circle-{{ loop.index }}" class="circle circle-inactif">{{ loop.index }}</span>
-                                {% endfor %}
-                              {% endif %}
-                              <div class="progress-bar">
-                                <span class="indicator"></span>
-                              </div>
-                            </div>
-                        </td>
-                        <td id="startTime"><div>{{ pipeline.date }}</div></td> 
-                        <td id="totalDuration-{{ loop.index }}">{{ pipeline.duration }}</td>
-                        <td id="detail"> 
-                          <div id="result1"></div>
-                          <div id="result2"></div>
-                          <div id="result3"></div>
-                          <div id="result4"></div>                        
-                          <div id="result5"></div>
-                          <div id="result5"></div>
-                        </td>
-                      </tr>
-                      {%- endfor %}
-                    </tbody>
-                  </table>
-
-              
-                  {% if user.isAdmin %}
-                  <h3>Tous les Clients</h3>
-                  {% for client in all_clients %}
-                  <pre>
-                      <strong>Client Info</strong>
-                      {%- for key, value in client.client_info.items() %}
-                      <strong>{{ key }}: </strong>{{ value }}
-                      {%- endfor %}
-                      <strong>Client Metadata</strong>
-                      {%- for key, value in client.client_metadata.items() %}
-                      <strong>{{ key }}: </strong>{{ value }}
-                      {%- endfor %}
-
-                  </pre>
-                  <hr>
-                  {% endfor %}
-                  {% endif %}
-                
-                  {% for client in user.clients %}
-                  {% if client.user == user %}
-                  <pre>
-                      <strong>Client Info</strong>
-                      {%- for key, value in client.client_info.items() %}
-                      <strong>{{ key }}: </strong>{{ value }}
-                      {%- endfor %}
-                      <strong>Client Metadata</strong>
-                      {%- for key, value in client.client_metadata.items() %}
-                      <strong>{{ key }}: </strong>{{ value }}
-                      {%- endfor %}
-                     
-                  </pre>
-                  <hr>
-                  {% endif %}
-                  {% endfor %}
-                
+      <div>
+        <h3 style="margin-top: 5px;">Tous les pipelines</h3>
+        <button id="bouton" onclick="arreterPipeline()" style="background-color: Black; margin-left: 5px;">Arrêter la pipeline</button>
+        <button id="bouton" onclick="executerActions()">Lancer la pipeline</button>
+      </div>
+        <div class="Pipeline">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Status</th>
+                <th scope="col">Pipeline</th>
+                <th scope="col">Stages</th>
+                <th scope="col">Date</th>
+                <th scope="col">Duration</th>
+                <th scope="col">Log</th>
+              </tr>
+            </thead>
+            <tbody>
+              {%- for pipeline in pipelines %}
+              <tr>
+                <th id="status-{{ loop.index }}" scope="row">{{ pipeline.status }}</th>
+                <td id="pipeline{{ loop.index }}">{{ pipeline.idPipeline }}</td>
+                <td>
+                    <div id="stages">
+                      {% if pipeline.stages_status|length > 0 %}
+                        {% set result_list = pipeline.stages_status.split(',') %}
+                        {% for status in result_list %}
+                            <span id="circle-{{ loop.index }}" class="circle circle-{{ status | replace('[', '') | replace(']', '') | replace('\"', '') | trim }}">{{ loop.index }}</span>
+                        {% endfor %}
+                      {% else %}
+                        {% for i in range(5) %}
+                          <span id="circle-{{ loop.index }}" class="circle circle-inactif">{{ loop.index }}</span>
+                        {% endfor %}
+                      {% endif %}
+                      <div class="progress-bar">
+                        <span class="indicator"></span>
+                      </div>
                     </div>
-                  </div>
-                  <script>
-                    async function executerActions() {
-                      const status_stages = ["inactif", "inactif", "inactif", "inactif", "inactif"];
-                      const startTime = new Date();
-                      let data = {
-                        'date': startTime
-                      } 
-                      let response = await post_data('/create_pipeline', data);
-                      if (response.statusState == "failed") {
-                        throw new Error(`HTTP error! ${response.statusError}`);
-                      }
-                      addNewPipelineRow(response.data.newPipeline);
-                      const scripts = [
-                      { endpoint: "{{ url_for('.run_code') }}", resultDivId: 'result1', circleId: 'circle-1', statusElementId: `status-${response.data.newPipeline.id}` },
-                      { endpoint: "{{ url_for('.run_second_code') }}", resultDivId: 'result2', circleId: 'circle-2', statusElementId: `status-${response.data.newPipeline.id}` },
-                      { endpoint: "{{ url_for('.run_sonar_code') }}", resultDivId: 'result3', circleId: 'circle-3', statusElementId: `status-${response.data.newPipeline.id}` },
-                      { endpoint: "{{ url_for('.create_dockers') }}", resultDivId: 'result4', circleId: 'circle-4', statusElementId: `status-${response.data.newPipeline.id}` },
-                      { endpoint: "{{ url_for('.deploy') }}", resultDivId: 'result5', circleId: 'circle-5', statusElementId: `status-${response.data.newPipeline.id}` }
-                      ];
-                  
-                      for (let i = 0; i < scripts.length; i++) {
-                        const result = await runScript(scripts[i].endpoint, scripts[i].resultDivId, scripts[i].circleId, scripts[i].statusElementId);
-                        status_stages[i] = result.statusState;
-                      }
-                      const endTime = new Date();
-                      const duration = endTime - startTime;
-                      console.log('Durée totale d\'exécution :', duration, 'millisecondes');
-                      response = await fetch('/last_user_pipeline');
-                      if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                      }
-                      const lastResult = await response.json();
-                      document.getElementById('totalDuration').innerText = duration + ' millisecondes';
-                      data = {
-                          'id': lastResult.id,
-                          'stages_status': status_stages,
-                          'status' : result.statusHttp,
-                          'duration': duration,
-                          'date': startTime
-                      };
-                      postResult = await post_data('/update_pipeline', data);
-                      if (postResult.statusState == "failed") {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                      }
-                    }              
-                  
-                    function formatDateTime(dateTime) {
-                        const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
-                        return dateTime.toLocaleString('fr-FR', options);
-                    }
-               
-                    function arreterPipeline() {
-                      let idPipeline = document.getElementById("stop-button").dataset.id;
-                      alert("Pipeline arrêtée !");
-                    }
+                </td>
+                <td id="startTime"><div>{{ pipeline.date }}</div></td> 
+                <td id="totalDuration-{{ loop.index }}">{{ pipeline.duration }}</td>
+                <td id="detail">
+                  {% for i in range(5)  %}
+                    <div id="result{{i}}"></div>
+                  {% endfor %}
+                </td>
+              </tr>
+              {%- endfor %}
+            </tbody>
+          </table>
 
-                    window.addEventListener('load', async function() {
-                      try {
-                          const lastPipeline = await get_data('/last_user_pipeline');
-                          updatePipelineStatus(lastPipeline);
-                      } catch (error) {
-                          console.error('Error loading last pipeline:', error.message);
-                      }
-                  });
-                </script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-        <script src="../static/Appcicd.js" defer></script>
-      </body>
+          
+          {% if user.isAdmin %}
+          <h3>Tous les Clients</h3>
+          {% for client in all_clients %}
+          <pre>
+              <strong>Client Info</strong>
+              {%- for key, value in client.client_info.items() %}
+              <strong>{{ key }}: </strong>{{ value }}
+              {%- endfor %}
+              <strong>Client Metadata</strong>
+              {%- for key, value in client.client_metadata.items() %}
+              <strong>{{ key }}: </strong>{{ value }}
+              {%- endfor %}
+
+          </pre>
+          <hr>
+          {% endfor %}
+          {% endif %}
+            
+          {% for client in user.clients %}
+          {% if client.user == user %}
+          <pre>
+              <strong>Client Info</strong>
+              {%- for key, value in client.client_info.items() %}
+              <strong>{{ key }}: </strong>{{ value }}
+              {%- endfor %}
+              <strong>Client Metadata</strong>
+              {%- for key, value in client.client_metadata.items() %}
+              <strong>{{ key }}: </strong>{{ value }}
+              {%- endfor %}
+              
+          </pre>
+          <hr>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      <script>
+        async function executerActions() {
+          let result;
+          const status_stages = ["inactif", "inactif", "inactif", "inactif", "inactif"];
+          const startTime = new Date();
+          let data = {
+            'date': startTime
+          } 
+          let response = await post_data('/create_pipeline', data);
+          if (response.statusState == "failed") {
+            throw new Error(`HTTP error! ${response.statusError}`);
+          }
+          addNewPipelineRow(response.data.newPipeline);
+          const scripts = [
+          { endpoint: "{{ url_for('.run_code') }}", resultDivId: 'result1', circleId: 'circle-1', statusElementId: `status-${response.data.newPipeline.id}` },
+          { endpoint: "{{ url_for('.run_second_code') }}", resultDivId: 'result2', circleId: 'circle-2', statusElementId: `status-${response.data.newPipeline.id}` },
+          { endpoint: "{{ url_for('.run_sonar_code') }}", resultDivId: 'result3', circleId: 'circle-3', statusElementId: `status-${response.data.newPipeline.id}` },
+          { endpoint: "{{ url_for('.create_dockers') }}", resultDivId: 'result4', circleId: 'circle-4', statusElementId: `status-${response.data.newPipeline.id}` },
+          { endpoint: "{{ url_for('.deploy') }}", resultDivId: 'result5', circleId: 'circle-5', statusElementId: `status-${response.data.newPipeline.id}` }
+          ];
+      
+          for (let i = 0; i < scripts.length; i++) {
+            result = await runScript(scripts[i].endpoint, scripts[i].resultDivId, scripts[i].circleId, scripts[i].statusElementId);
+            status_stages[i] = result.statusState;
+            if(result.statusState == "failed"){
+              break;
+            }
+          }
+          const endTime = new Date();
+          const duration = endTime - startTime;
+          console.log('Durée totale d\'exécution :', duration, 'millisecondes');
+          response = await fetch('/last_user_pipeline');
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const lastResult = await response.json();
+          document.getElementById('totalDuration').innerText = duration + ' millisecondes';
+          data = {
+              'id': lastResult.id,
+              'stages_status': status_stages,
+              'status' : result.statusHttp,
+              'duration': duration,
+              'date': startTime
+          };
+          postResult = await post_data('/update_pipeline', data);
+          if (postResult.statusState == "failed") {
+            throw new Error(`HTTP error! ${postResult.statusError}`);
+          }
+        }              
+      
+        function formatDateTime(dateTime) {
+            const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+            return dateTime.toLocaleString('fr-FR', options);
+        }
+
+        function arreterPipeline() {
+          let idPipeline = document.getElementById("stop-button").dataset.id;
+          alert("Pipeline arrêtée !");
+        }
+
+        function logout(){
+          document.getElementById("bouton").addEventListener("click", function() {
+            window.location.href = "{{ url_for('.logout') }}";
+          });
+        }
+
+        /*window.addEventListener('load', async function() {
+          try {
+              const lastPipeline = await get_data('/last_user_pipeline');
+              updatePipelineStatus(lastPipeline);
+          } catch (error) {
+              console.error('Error loading last pipeline:', error.message);
+          }
+      });*/
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="../static/Appcicd.js" defer></script>
+  </body>
 </html>
