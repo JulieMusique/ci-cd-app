@@ -14,7 +14,7 @@
 - Assurez-vous que la machine est configurée avec un réseau acces par pont. 
 Pour ce faire, exécutez la commande suivante : ip a
 Récupérez l'adresse IP attribuée à l'interface `enp0s3`. Ajoutez cette adresse IP dans le script `/login/shells/dockerbuild.py`.
-
+Apres le deploiement lancer http://localhost:80 pour acceder à l'application 
 
 ## Configuration de SonarQube
 - Pour configurer SonarQube, suivez les étapes ci-dessous :
@@ -56,4 +56,6 @@ Sinon vous pouvez créer un nouvel utilisateur grâce à la page de création d'
 
 ## Page d'accueil
 ![image](https://github.com/JulieMusique/ci-cd-app/assets/126576943/9813a1f3-1d1d-48cf-a0d3-b2082228b708)
+
+PS: pour le script testzap.py -> Poc pour la partie pentest il suffit juste d'installer OWASP ZAP et bien configure l'ip docker et ca devrait fonctionner en consultant le rapport qui sera telecharge il n'est pas integre dans le projet mais fonctionne super bien 
 
