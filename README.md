@@ -11,8 +11,9 @@
   - **Mot de passe :** Progtr00
 
 ## Vérification de la configuration réseau
-- Assurez-vous que la machine est configurée avec un réseau acces par pont. Si ce n'est pas le cas, veuillez suivre les étapes ci-dessous pour configurer le réseau correctement.
-
+- Assurez-vous que la machine est configurée avec un réseau acces par pont. 
+Pour ce faire, exécutez la commande suivante : ip a
+Récupérez l'adresse IP attribuée à l'interface `enp0s3`. Ajoutez cette adresse IP dans le script `/login/shells/dockerbuild.py`.
 
 
 ## Configuration de SonarQube
