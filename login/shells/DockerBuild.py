@@ -5,7 +5,7 @@ import json
 import paramiko
 import os
 # Informations de connexion SSH
-host = "192.168.1.3"
+host = "192.168.1.27"
 port = 22
 print("Répertoire de travail actuel :", os.getcwd())
 
@@ -39,12 +39,12 @@ def decrypt_config(encrypted_config, cipher_suite):
 
 
 # Charger ou générer la clé de cryptage
-key_file = './shells/log/encryption_key.key'
+key_file = './login/shells/log/encryption_key.key'
 encryption_key = load_or_generate_key(key_file)
 cipher_suite = initialize_cipher(encryption_key)
 
 # Charger ou déchiffrer le fichier de configuration JSON
-config_file = './shells/log/config.encrypted'
+config_file = './login/shells/log/config.encrypted'
 try:
     with open(config_file, 'rb') as cf:
         encrypted_config = cf.read()
@@ -122,13 +122,11 @@ def check_dockerfile_exists(ssh, folder):
         transfer_file(ssh, f"./Delivecrous-front/{folder}/dockerfile", f"/home/admin/{folder}/dockerfile")
     else:
         transfer_file(ssh, f"{folder}/dockerfile", f"/home/admin/{folder}/dockerfile")
+        transfer_file(ssh, f"./delivecrous-0.0.1-SNAPSHOT.jar", f"/home/admin/{folder}/target/delivecrous-0.0.1-SNAPSHOT.jar")
     #transfer_file(ssh,"{folder}/dockerfile","dockerfile")
     change_dir_cmd = f"cd {folder} ; pwd"
-    print(change_dir_cmd)
     stdin, stdout, stderr = ssh.exec_command(change_dir_cmd)
     current_dir = stdout.read().decode().strip()
-    print(current_dir)
-    print(folder)
     
     # Check if Dockerfile exists in the specified folder (case-insensitive)
     dockerfile_exists_cmd = f"ls -i {current_dir} | grep -i dockerfile | wc -l"
