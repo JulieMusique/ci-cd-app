@@ -117,10 +117,17 @@ def deployDocker(ssh, folder, docker, port):
     return exit_status == 0
   
 def check_dockerfile_exists(ssh, folder):
-    transfer_file(ssh,"{folder}/dockerfile","dockerfile")
+
+    if folder == "./flutter_food_delivery_ui_kit-master":
+        transfer_file(ssh, f"./Delivecrous-front/{folder}/dockerfile", f"/home/admin/{folder}/dockerfile")
+    else:
+        transfer_file(ssh, f"{folder}/dockerfile", f"/home/admin/{folder}/dockerfile")
+    #transfer_file(ssh,"{folder}/dockerfile","dockerfile")
     change_dir_cmd = f"cd {folder} ; pwd"
+    print(change_dir_cmd)
     stdin, stdout, stderr = ssh.exec_command(change_dir_cmd)
     current_dir = stdout.read().decode().strip()
+    print(current_dir)
     print(folder)
     
     # Check if Dockerfile exists in the specified folder (case-insensitive)
@@ -134,6 +141,7 @@ def transfer_file(ssh, local_file, remote_file):
         sftp.put(local_file, remote_file)
     finally:
         sftp.close()
+
 def transfer_folder(ssh, local_folder, remote_host):
     remote_folder_path = f"/home/admin/{local_folder.split('/')[-1]}"
 
@@ -151,11 +159,7 @@ def transfer_folder(ssh, local_folder, remote_host):
         print(f"Transfert du dossier {local_folder} réussi.")
     except subprocess.CalledProcessError as e:
         print(f"Erreur lors du transfert du dossier {local_folder}: {e}")
-def compress_directory_to_zip(directory_path, zip_file_path):
-    with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(directory_path):
-            for file in files:
-                zipf.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), os.path.join(directory_path, '..')))
+
 try:
     # Connexion à l'hôte
     ssh = connect_ssh(host, port, config['username'], config['password'])
@@ -163,22 +167,23 @@ try:
     stdin, stdout, stderr = ssh.exec_command("sudo docker --version")
     docker_version_output = stdout.read().decode().strip()
     if docker_version_output:
-            print("Docker est déjà installé.")
+        print("Docker est déjà installé.")
     else:
-            print("Docker n'est pas installé. Tentative d'installation...")
+        print("Docker n'est pas installé. Tentative d'installation...")
 
 
-            # Commande d'installation de Docker avec gestion du mot de passe sudo
-            install_docker_command = f"sudo apt-get update && sudo apt-get install -y docker.io"
-            stdin, stdout, stderr = ssh.exec_command(install_docker_command)
+        # Commande d'installation de Docker avec gestion du mot de passe sudo
+        install_docker_command = f"sudo apt-get update && sudo apt-get install -y docker.io"
+        stdin, stdout, stderr = ssh.exec_command(install_docker_command)
 
-            # Attendre la fin de l'exécution de la commande
-            exit_status = stdout.channel.recv_exit_status()
-            if exit_status == 0:
-                print("Docker a été installé avec succès.")
-            else:
-                print("Échec de l'installation de Docker. Vérifiez les erreurs ci-dessous:")
-                print(stderr.read().decode())
+        # Attendre la fin de l'exécution de la commande
+        exit_status = stdout.channel.recv_exit_status()
+        if exit_status == 0:
+            print("Docker a été installé avec succès.")
+        else:
+            print("Échec de l'installation de Docker. Vérifiez les erreurs ci-dessous:")
+            print(stderr.read().decode())
+            
     # Vérification de la connexion SSH
     stdin, stdout, stderr = ssh.exec_command("echo success")
     # Déploiement Docker Compose
@@ -191,13 +196,16 @@ try:
             deployDocker(ssh, "./Delivecrous-back","back",8080)
         else:
             print("Le fichier Dockerfile n'existe pas dans le dossier delivecrous-back")
-         # Vérification de l'existence de Dockerfile dans le dossier front
+
+        # Vérification de l'existence de Dockerfile dans le dossier front
         if check_dockerfile_exists(ssh, "./flutter_food_delivery_ui_kit-master"):
             print("Le fichier Dockerfile existe dans le dossier flutter_food_delivery_ui_kit-master.")
             deployDocker(ssh, "./flutter_food_delivery_ui_kit-master","front",80)
-
         else:
             print("Le fichier Dockerfile n'existe pas dans le dossier flutter_food_delivery_ui_kit-master.")
+
+except Exception as e:
+    print(f"Erreur lors de la connexion SSH : {e}")
 finally:
     # Fermeture de la connexion SSH
     if ssh:
